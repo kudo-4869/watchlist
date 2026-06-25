@@ -1,0 +1,788 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>أرشيفي</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@500;700;800&family=Tajawal:wght@400;500;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#14151A;
+    --surface:#1C1E25;
+    --surface2:#252832;
+    --line: rgba(255,255,255,.09);
+    --text:#F2F0E9;
+    --muted:#92959f;
+    --muted2:#5d6070;
+    --series:#E3B23C;
+    --movie:#36C2B4;
+    --anime:#E2683B;
+    --play:#8C7AE6;
+    --danger:#D85C5C;
+    --good:#5FB87A;
+    --radius:14px;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--bg);
+    color:var(--text);
+    font-family:'Tajawal',sans-serif;
+    min-height:100vh;
+    -webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h3,.display{font-family:'Cairo',sans-serif;}
+  .mono{font-family:'JetBrains Mono',monospace;}
+  button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit;}
+  a{color:inherit;}
+  ::-webkit-scrollbar{width:8px;height:8px;}
+  ::-webkit-scrollbar-thumb{background:var(--surface2);border-radius:8px;}
+
+  #compatBanner{
+    display:none;position:fixed;top:0;left:0;right:0;z-index:80;
+    background:#3a2230;border-bottom:1px solid var(--danger);color:#f4d6d6;
+    font-size:13px;padding:10px 16px;text-align:center;
+  }
+  #compatBanner a{color:var(--series);font-weight:700;text-decoration:underline;}
+
+  /* ===== layout ===== */
+  #app{display:flex;min-height:100vh;}
+
+  .sidebar{
+    width:240px;flex:none;
+    background:var(--surface);
+    border-left:1px solid var(--line);
+    padding:22px 16px;
+    display:flex;flex-direction:column;gap:22px;
+    position:sticky;top:0;height:100vh;
+  }
+  .brand{display:flex;align-items:center;gap:10px;padding:0 4px;}
+  .brand-mark{width:30px;height:30px;flex:none;}
+  .brand h1{font-size:19px;margin:0;font-weight:800;letter-spacing:.2px;}
+  .brand span{display:block;font-size:11px;color:var(--muted2);font-family:'Tajawal';font-weight:400;margin-top:1px;}
+
+  .nav{display:flex;flex-direction:column;gap:4px;}
+  .nav button{
+    display:flex;align-items:center;gap:10px;
+    padding:10px 12px;border-radius:10px;
+    font-size:14.5px;font-weight:500;color:var(--muted);
+    text-align:right;transition:.15s;
+  }
+  .nav button .dot{width:8px;height:8px;border-radius:50%;background:var(--muted2);flex:none;}
+  .nav button:hover{background:var(--surface2);color:var(--text);}
+  .nav button.active{background:var(--surface2);color:var(--text);}
+  .nav button.active .dot{background:var(--accent-color,var(--series));}
+  .nav button .count{margin-right:auto;font-family:'JetBrains Mono';font-size:11.5px;color:var(--muted2);}
+
+  .sidebar-bottom{margin-top:auto;display:flex;flex-direction:column;gap:8px;}
+  .check-status{
+    font-size:11.5px;color:var(--muted2);padding:10px 12px;
+    background:var(--surface2);border-radius:10px;line-height:1.7;
+  }
+  .check-status b{color:var(--muted);font-weight:600;}
+  .check-status .repo-link{color:var(--series);cursor:pointer;font-weight:600;}
+  .ghost-btn{
+    font-size:13px;color:var(--muted2);padding:8px 12px;border-radius:10px;
+    border:1px dashed var(--line);text-align:center;transition:.15s;width:100%;
+  }
+  .ghost-btn:hover{color:var(--text);border-color:var(--muted2);}
+  .ghost-btn.danger:hover{color:var(--danger);border-color:var(--danger);}
+
+  .main{flex:1;min-width:0;padding:24px 32px 60px;}
+  .topbar{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:22px;gap:16px;flex-wrap:wrap;}
+  .topbar h2{font-size:24px;margin:0 0 4px;font-weight:800;}
+  .topbar p{margin:0;color:var(--muted2);font-size:13px;}
+  .actions{display:flex;gap:10px;}
+  .btn{
+    display:flex;align-items:center;gap:8px;
+    padding:10px 16px;border-radius:10px;font-size:14px;font-weight:700;
+    transition:.15s;
+  }
+  .btn-primary{background:var(--series);color:#1a1305;}
+  .btn-primary:hover{filter:brightness(1.08);}
+  .btn-secondary{background:var(--surface2);color:var(--text);border:1px solid var(--line);}
+  .btn-secondary:hover{background:#2e313c;}
+  .btn:disabled{opacity:.5;cursor:not-allowed;}
+
+  /* ===== grid & ticket cards ===== */
+  .grid{
+    display:grid;grid-template-columns:repeat(auto-fill,minmax(168px,1fr));
+    gap:18px;
+  }
+  .card{
+    background:var(--surface);border-radius:var(--radius);overflow:hidden;
+    position:relative;transition:transform .15s, box-shadow .15s;
+    border:1px solid var(--line);
+  }
+  .card:hover{transform:translateY(-4px);box-shadow:0 12px 24px -10px rgba(0,0,0,.6);}
+  .poster{
+    aspect-ratio:2/3;background:var(--surface2) center/cover no-repeat;
+    position:relative;display:flex;align-items:center;justify-content:center;
+  }
+  .poster.no-img::after{content:'🎬';font-size:30px;opacity:.35;}
+  .type-chip{
+    position:absolute;top:8px;right:8px;font-size:10.5px;font-weight:700;
+    padding:3px 8px;border-radius:20px;color:#10110f;
+  }
+  .news-dot{
+    position:absolute;top:8px;left:8px;width:9px;height:9px;border-radius:50%;
+    background:var(--anime);box-shadow:0 0 0 3px rgba(226,104,59,.25);
+  }
+  .perf{
+    height:1px;position:relative;
+    background:repeating-linear-gradient(to left,var(--line) 0 6px,transparent 6px 12px);
+    margin:0 10px;
+  }
+  .perf::before,.perf::after{
+    content:'';position:absolute;top:-7px;width:14px;height:14px;border-radius:50%;
+    background:var(--bg);
+  }
+  .perf::before{right:-17px;} .perf::after{left:-17px;}
+  .stub{padding:10px 12px 12px;}
+  .stub .title{font-size:13.5px;font-weight:700;line-height:1.35;
+    display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;min-height:35px;}
+  .stub .meta-row{display:flex;justify-content:space-between;align-items:center;margin-top:6px;}
+  .stub .year{font-size:11px;color:var(--muted2);font-family:'JetBrains Mono';}
+  .wstatus{font-size:10px;padding:2px 7px;border-radius:20px;background:var(--surface2);color:var(--muted);}
+  .progress-bar{height:4px;border-radius:4px;background:var(--surface2);margin-top:8px;overflow:hidden;}
+  .progress-bar > div{height:100%;border-radius:4px;}
+
+  .empty{
+    grid-column:1/-1;text-align:center;padding:70px 20px;color:var(--muted2);
+  }
+  .empty .big{font-size:32px;margin-bottom:10px;}
+  .empty p{margin:4px 0;font-size:14px;}
+
+  /* ===== modal ===== */
+  .overlay{
+    position:fixed;inset:0;background:rgba(8,9,12,.72);backdrop-filter:blur(3px);
+    display:flex;align-items:center;justify-content:center;z-index:50;padding:20px;
+    opacity:0;pointer-events:none;transition:.15s;
+  }
+  .overlay.show{opacity:1;pointer-events:auto;}
+  .modal{
+    background:var(--surface);border-radius:18px;max-width:560px;width:100%;
+    max-height:88vh;overflow-y:auto;border:1px solid var(--line);
+    transform:translateY(8px);transition:.15s;
+  }
+  .overlay.show .modal{transform:translateY(0);}
+  .modal-head{display:flex;align-items:center;justify-content:space-between;
+    padding:18px 20px;border-bottom:1px solid var(--line);position:sticky;top:0;background:var(--surface);z-index:2;}
+  .modal-head h3{margin:0;font-size:17px;}
+  .modal-body{padding:20px;}
+  .x-btn{font-size:18px;color:var(--muted);padding:4px;border-radius:8px;}
+  .x-btn:hover{color:var(--text);background:var(--surface2);}
+
+  .field{margin-bottom:14px;}
+  .field label{display:block;font-size:12.5px;color:var(--muted);margin-bottom:6px;font-weight:600;}
+  .field input[type=text],.field textarea,.field select{
+    width:100%;background:var(--surface2);border:1px solid var(--line);color:var(--text);
+    padding:10px 12px;border-radius:10px;font-size:14px;font-family:inherit;
+  }
+  .field textarea{resize:vertical;min-height:60px;}
+  .hint{font-size:12px;color:var(--muted2);line-height:1.6;margin:0 0 14px;}
+  .type-pick{display:flex;gap:8px;flex-wrap:wrap;}
+  .type-pick button{
+    padding:8px 14px;border-radius:10px;font-size:13px;font-weight:600;
+    background:var(--surface2);border:1px solid var(--line);color:var(--muted);
+  }
+  .type-pick button.sel{color:#10110f;border-color:transparent;}
+
+  /* detail modal */
+  .detail-top{display:flex;gap:16px;padding:20px;}
+  .detail-poster{width:110px;flex:none;aspect-ratio:2/3;border-radius:10px;background:var(--surface2) center/cover no-repeat;}
+  .detail-info h3{margin:0 0 4px;font-size:18px;}
+  .detail-info .sub{font-size:12.5px;color:var(--muted2);margin-bottom:8px;font-family:'JetBrains Mono';}
+  .detail-info p{font-size:13.5px;color:var(--muted);line-height:1.6;margin:0;}
+  .status-pill{display:inline-block;font-size:11px;padding:3px 9px;border-radius:20px;margin-top:8px;}
+
+  .tabs{display:flex;gap:4px;padding:0 20px;border-bottom:1px solid var(--line);}
+  .tabs button{padding:10px 14px;font-size:13.5px;font-weight:600;color:var(--muted2);border-bottom:2px solid transparent;}
+  .tabs button.active{color:var(--text);border-color:var(--series);}
+  .tab-panel{padding:18px 20px;}
+  .tab-panel.hidden{display:none;}
+
+  .stepper{display:flex;align-items:center;gap:10px;}
+  .stepper button{width:30px;height:30px;border-radius:8px;background:var(--surface2);border:1px solid var(--line);font-size:16px;font-weight:700;}
+  .stepper button:hover{background:#2e313c;}
+  .stepper .val{min-width:38px;text-align:center;font-family:'JetBrains Mono';font-weight:700;}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+  .rate-row{display:flex;gap:6px;flex-wrap:wrap;}
+  .rate-row button{width:30px;height:30px;border-radius:8px;background:var(--surface2);border:1px solid var(--line);font-size:12.5px;font-family:'JetBrains Mono';}
+  .rate-row button.sel{background:var(--series);color:#10110f;border-color:transparent;}
+
+  .news-group{margin-bottom:18px;}
+  .news-group h4{font-size:12.5px;font-weight:700;margin:0 0 8px;display:flex;align-items:center;gap:8px;}
+  .news-group h4 .bar{width:3px;height:13px;border-radius:2px;}
+  .news-item{background:var(--surface2);border-radius:10px;padding:10px 12px;margin-bottom:7px;}
+  .news-item .d{font-size:11px;color:var(--muted2);font-family:'JetBrains Mono';margin-bottom:3px;}
+  .news-item .s{font-size:13px;line-height:1.55;color:var(--text);}
+  .news-item .src{font-size:11px;color:var(--muted2);margin-top:4px;}
+  .news-empty{font-size:12.5px;color:var(--muted2);background:none;padding:4px 0 12px;}
+  .news-foot{display:flex;justify-content:space-between;align-items:center;margin-top:4px;font-size:11.5px;color:var(--muted2);gap:10px;flex-wrap:wrap;}
+
+  .danger-link{color:var(--danger);font-size:13px;font-weight:600;}
+  .danger-link:hover{text-decoration:underline;}
+  .plain-link{color:var(--series);font-size:13px;font-weight:600;}
+  .plain-link:hover{text-decoration:underline;}
+
+  /* toast */
+  #toasts{position:fixed;bottom:20px;left:20px;z-index:100;display:flex;flex-direction:column;gap:8px;}
+  .toast{
+    background:var(--surface2);border:1px solid var(--line);color:var(--text);
+    padding:11px 16px;border-radius:10px;font-size:13.5px;box-shadow:0 8px 20px -8px rgba(0,0,0,.5);
+    animation:in .2s ease;max-width:320px;
+  }
+  .toast.error{border-color:var(--danger);}
+  .toast.success{border-color:var(--good);}
+  @keyframes in{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+
+  /* confirm modal */
+  .confirm-box{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:20px;max-width:340px;}
+  .confirm-box p{font-size:14px;color:var(--muted);line-height:1.6;margin:0 0 16px;}
+  .confirm-actions{display:flex;gap:8px;justify-content:flex-end;}
+
+  @media (max-width:720px){
+    .sidebar{position:fixed;bottom:0;top:auto;width:100%;height:auto;flex-direction:row;
+      border-left:none;border-top:1px solid var(--line);padding:10px;overflow-x:auto;z-index:20;}
+    .brand,.sidebar-bottom{display:none;}
+    .nav{flex-direction:row;}
+    .nav button .count{display:none;}
+    .main{padding:18px 14px 90px;}
+    .detail-top{flex-direction:column;}
+    .detail-poster{width:100%;}
+  }
+  :focus-visible{outline:2px solid var(--series);outline-offset:2px;}
+</style>
+</head>
+<body>
+<div id="compatBanner"></div>
+
+<div id="app">
+  <aside class="sidebar">
+    <div class="brand">
+      <svg class="brand-mark" viewBox="0 0 30 30" fill="none">
+        <rect x="2" y="5" width="26" height="20" rx="4" fill="#252832" stroke="#E3B23C" stroke-width="1.5"/>
+        <circle cx="8" cy="9" r="1.4" fill="#E3B23C"/><circle cx="8" cy="21" r="1.4" fill="#36C2B4"/>
+        <circle cx="22" cy="9" r="1.4" fill="#E2683B"/><circle cx="22" cy="21" r="1.4" fill="#8C7AE6"/>
+        <path d="M12 11l7 4-7 4z" fill="#F2F0E9"/>
+      </svg>
+      <div><h1>أرشيفي</h1><span>مكتبتك الشخصية</span></div>
+    </div>
+    <nav class="nav" id="nav"></nav>
+    <div class="sidebar-bottom">
+      <div class="check-status" id="checkStatus">—</div>
+      <button class="ghost-btn" id="exportBtn">⬇ تصدير بياناتي</button>
+      <button class="ghost-btn" id="importBtn">⬆ استيراد بياناتي</button>
+      <input type="file" id="importFile" accept="application/json" style="display:none">
+      <button class="ghost-btn danger" id="resetBtn">تصفير بياناتي المحلية</button>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="topbar">
+      <div>
+        <h2 id="sectionTitle">الكل</h2>
+        <p id="sectionSub">كل ما تتابعه في مكان واحد</p>
+      </div>
+      <div class="actions">
+        <button class="btn btn-secondary" id="refreshAllBtn">🔄 تحديث الآن على GitHub</button>
+        <button class="btn btn-primary" id="addBtn">＋ إضافة عمل</button>
+      </div>
+    </div>
+    <div class="grid" id="grid"></div>
+  </main>
+</div>
+
+<div id="toasts"></div>
+
+<!-- Add / Settings Modal -->
+<div class="overlay" id="addOverlay">
+  <div class="modal" id="addModal"></div>
+</div>
+
+<!-- Detail Modal -->
+<div class="overlay" id="detailOverlay">
+  <div class="modal" id="detailModal"></div>
+</div>
+
+<!-- Confirm Modal -->
+<div class="overlay" id="confirmOverlay">
+  <div class="confirm-box" id="confirmBox"></div>
+</div>
+
+<script>
+/* ===================== CONFIG ===================== */
+const TYPE_LABELS = {series:'مسلسل', movie:'فيلم', anime:'أنمي', play:'مسرحية'};
+const TYPE_COLORS = {series:'var(--series)', movie:'var(--movie)', anime:'var(--anime)', play:'var(--play)'};
+const STATUS_LABELS = {ongoing:'مستمر', ended:'منتهي', cancelled:'ملغى', unknown:'غير معروف'};
+const STATUS_COLORS = {ongoing:'var(--good)', ended:'var(--muted2)', cancelled:'var(--danger)', unknown:'var(--muted2)'};
+const WATCH_LABELS = {planning:'مخطط له', watching:'أتابعه الآن', completed:'مكتمل', onhold:'متوقف مؤقتًا', dropped:'متوقف نهائيًا'};
+const NEWS_LABELS = {season_news:'مواسم جديدة / إلغاء', release_news:'مواعيد العرض والتأجيل', general_news:'أخبار عامة'};
+const NEWS_COLORS = {season_news:'var(--anime)', release_news:'var(--movie)', general_news:'var(--play)'};
+const LOCAL_KEY = 'watchlist_local_v1';
+
+let CATALOG = { updatedAt: null, items: [] };
+let LOCAL = { progress:{}, overrides:{}, hidden:{}, settings:{ repo:'' } };
+let activeSection = 'all';
+let activeDetailId = null;
+let activeDetailTab = 'overview';
+let catalogLoadFailed = false;
+
+/* ===================== LOCAL STORAGE ===================== */
+function loadLocal(){
+  try{
+    const raw = localStorage.getItem(LOCAL_KEY);
+    if(raw){
+      const parsed = JSON.parse(raw);
+      LOCAL = Object.assign({progress:{},overrides:{},hidden:{},settings:{repo:''}}, parsed);
+      LOCAL.settings = Object.assign({repo:''}, LOCAL.settings);
+    }
+  }catch(e){ console.error(e); }
+}
+function saveLocal(){
+  try{ localStorage.setItem(LOCAL_KEY, JSON.stringify(LOCAL)); }
+  catch(e){ showToast('تعذّر حفظ بياناتك محليًا في هذا المتصفح', 'error'); }
+}
+
+/* ===================== CATALOG (read-only, from GitHub) ===================== */
+async function loadCatalog(){
+  try{
+    const res = await fetch('./data/catalog.json', {cache:'no-store'});
+    if(!res.ok) throw new Error('http_'+res.status);
+    CATALOG = await res.json();
+    catalogLoadFailed = false;
+  }catch(e){
+    console.error('catalog load failed', e);
+    catalogLoadFailed = true;
+    CATALOG = { updatedAt:null, items:[] };
+  }
+}
+
+/* ===================== HELPERS ===================== */
+function escapeHtml(s){ return (s==null?'':String(s)).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function timeAgo(iso){
+  if(!iso) return 'لم يتم التحقق أبدًا';
+  const diff = Date.now() - new Date(iso).getTime();
+  const h = Math.floor(diff/3600000);
+  if(h < 1) return 'منذ دقائق';
+  if(h < 24) return `منذ ${h} ساعة`;
+  return `منذ ${Math.floor(h/24)} يوم`;
+}
+function showToast(msg, type){
+  const el = document.createElement('div');
+  el.className = 'toast'+(type?' '+type:'');
+  el.textContent = msg;
+  document.getElementById('toasts').appendChild(el);
+  setTimeout(()=>el.remove(), 4200);
+}
+function openOverlay(id){ document.getElementById(id).classList.add('show'); }
+function closeOverlay(id){ document.getElementById(id).classList.remove('show'); }
+
+function repoSet(){ return !!(LOCAL.settings.repo && LOCAL.settings.repo.includes('/')); }
+function addItemLink(){ return `https://github.com/${LOCAL.settings.repo}/actions/workflows/add-item.yml`; }
+function updateNowLink(){ return `https://github.com/${LOCAL.settings.repo}/actions/workflows/daily-update.yml`; }
+function editTitlesLink(){ return `https://github.com/${LOCAL.settings.repo}/edit/main/data/titles.json`; }
+
+function getProgress(id){
+  return LOCAL.progress[id] || {watchStatus:'planning', currentSeason:1, currentEpisode:0, watchedEpisodes:0, rating:null, notes:'', updatedAt:null};
+}
+function getOverride(id){ return LOCAL.overrides[id] || {}; }
+function mergedItem(catalogItem){
+  const ov = getOverride(catalogItem.id);
+  const merged = Object.assign({}, catalogItem, ov);
+  merged.progress = getProgress(catalogItem.id);
+  merged.news = catalogItem.news || {season_news:[],release_news:[],general_news:[]};
+  return merged;
+}
+function visibleItems(){
+  return (CATALOG.items||[])
+    .filter(i => !LOCAL.hidden[i.id])
+    .map(mergedItem);
+}
+function findRawItem(id){ return (CATALOG.items||[]).find(i=>i.id===id); }
+
+/* ===================== NAV / RENDER ===================== */
+function sectionCounts(){
+  const all = visibleItems();
+  return {
+    all: all.length,
+    series: all.filter(i=>i.type==='series').length,
+    movie: all.filter(i=>i.type==='movie').length,
+    anime: all.filter(i=>i.type==='anime').length,
+    play: all.filter(i=>i.type==='play').length
+  };
+}
+function renderNav(){
+  const counts = sectionCounts();
+  const sections = [
+    {key:'all', label:'الكل', color:'var(--series)'},
+    {key:'series', label:'مسلسلات', color:'var(--series)'},
+    {key:'movie', label:'أفلام', color:'var(--movie)'},
+    {key:'anime', label:'أنمي', color:'var(--anime)'},
+    {key:'play', label:'مسرحيات', color:'var(--play)'}
+  ];
+  const nav = document.getElementById('nav');
+  nav.innerHTML = sections.map(s=>`
+    <button data-sec="${s.key}" class="${activeSection===s.key?'active':''}" style="--accent-color:${s.color}">
+      <span class="dot" style="${activeSection===s.key?`background:${s.color}`:''}"></span>
+      <span>${s.label}</span>
+      <span class="count">${counts[s.key]}</span>
+    </button>`).join('');
+  nav.querySelectorAll('button').forEach(b=>b.addEventListener('click', ()=>{
+    activeSection = b.dataset.sec; renderAll();
+  }));
+}
+function renderTopbar(){
+  const titles = {all:'الكل', series:'مسلسلات', movie:'أفلام', anime:'أنمي', play:'مسرحيات'};
+  const subs = {
+    all:'كل ما تتابعه في مكان واحد',
+    series:'تتبّع مواسمك وحلقاتك',
+    movie:'الأفلام التي شاهدتها أو تخطط لها',
+    anime:'متابعة الحلقات والمواسم',
+    play:'المسرحيات والعروض التي تتابعها'
+  };
+  document.getElementById('sectionTitle').textContent = titles[activeSection];
+  document.getElementById('sectionSub').textContent = subs[activeSection];
+}
+function renderCheckStatus(){
+  const el = document.getElementById('checkStatus');
+  const repoText = repoSet() ? `<span class="repo-link" id="repoLinkBtn">${escapeHtml(LOCAL.settings.repo)}</span>` : `<span class="repo-link" id="repoLinkBtn">غير محدد — اضغط للربط</span>`;
+  el.innerHTML = `<b>آخر تحديث من GitHub:</b><br>${timeAgo(CATALOG.updatedAt)}<br><br><b>المستودع:</b><br>${repoText}`;
+  const btn = document.getElementById('repoLinkBtn');
+  if(btn) btn.addEventListener('click', openSettingsModal);
+}
+function progressFraction(item){
+  const p = item.progress;
+  if(item.type==='movie' || item.type==='play') return p.watchStatus==='completed' ? 1 : 0;
+  const total = item.total_episodes || (item.total_seasons ? item.total_seasons*12 : null);
+  if(!total) return p.watchStatus==='completed' ? 1 : 0;
+  return Math.max(0, Math.min(1, (p.watchedEpisodes||0)/total));
+}
+function renderGrid(){
+  const grid = document.getElementById('grid');
+  const list = visibleItems().filter(i=> activeSection==='all' || i.type===activeSection);
+  if(catalogLoadFailed){
+    grid.innerHTML = `<div class="empty"><div class="big">⚠️</div><p>تعذّر تحميل data/catalog.json</p><p>إذا تفتح الملف محليًا من جهازك، شغّل سيرفر محلي صغير (مثل: <span class="mono">npx serve .</span>) بدل فتح الملف مباشرة، أو انشره على GitHub Pages.</p></div>`;
+    return;
+  }
+  if(list.length===0){
+    grid.innerHTML = `<div class="empty"><div class="big">📼</div><p>القسم فاضي لين الحين.</p><p>اضغط «إضافة عمل» وابدأ أرشيفك.</p></div>`;
+    return;
+  }
+  grid.innerHTML = list.map(item=>{
+    const frac = progressFraction(item);
+    const hasNews = (item.news.season_news.length + item.news.release_news.length + item.news.general_news.length) > 0;
+    return `
+    <div class="card" data-id="${item.id}">
+      <div class="poster ${item.poster_url?'':'no-img'}" style="${item.poster_url?`background-image:url('${escapeHtml(item.poster_url)}')`:''}">
+        <span class="type-chip" style="background:${TYPE_COLORS[item.type]}">${TYPE_LABELS[item.type]}</span>
+        ${hasNews?'<span class="news-dot" title="أخبار جديدة"></span>':''}
+      </div>
+      <div class="perf"></div>
+      <div class="stub">
+        <div class="title">${escapeHtml(item.title)}</div>
+        <div class="meta-row">
+          <span class="year">${escapeHtml(item.year||'—')}</span>
+          <span class="wstatus">${WATCH_LABELS[item.progress.watchStatus]}</span>
+        </div>
+        <div class="progress-bar"><div style="width:${Math.round(frac*100)}%;background:${TYPE_COLORS[item.type]}"></div></div>
+      </div>
+    </div>`;
+  }).join('');
+  grid.querySelectorAll('.card').forEach(c=>c.addEventListener('click', ()=> openDetail(c.dataset.id)));
+}
+function renderAll(){ renderNav(); renderTopbar(); renderGrid(); renderCheckStatus(); }
+
+/* ===================== ADD / SETTINGS MODAL ===================== */
+let addType = 'series';
+function openSettingsModal(){ renderAddModal('settings'); openOverlay('addOverlay'); }
+document.getElementById('addBtn').addEventListener('click', ()=>{
+  addType = ['series','movie','anime','play'].includes(activeSection) ? activeSection : 'series';
+  renderAddModal(repoSet() ? 'add' : 'settings');
+  openOverlay('addOverlay');
+});
+function renderAddModal(mode){
+  const modal = document.getElementById('addModal');
+  if(mode === 'settings'){
+    modal.innerHTML = `
+      <div class="modal-head"><h3>ربط مستودع GitHub</h3><button class="x-btn" data-close="addOverlay">✕</button></div>
+      <div class="modal-body">
+        <p class="hint">أدخل اسم مستودعك بصيغة <span class="mono">username/repo</span> (نفس المستودع اللي رفعت فيه ملفات هذا الموقع). نحفظه في متصفحك فقط، ونستخدمه لفتح صفحات GitHub Actions المناسبة بضغطة واحدة.</p>
+        <div class="field"><label>اسم المستودع</label><input type="text" id="repoInput" placeholder="username/watchlist" value="${escapeHtml(LOCAL.settings.repo||'')}"></div>
+        <button class="btn btn-primary" id="saveRepoBtn" style="width:100%;justify-content:center;">حفظ والمتابعة</button>
+      </div>`;
+    document.getElementById('saveRepoBtn').addEventListener('click', ()=>{
+      const val = document.getElementById('repoInput').value.trim().replace(/^https?:\/\/github\.com\//,'').replace(/\/$/,'');
+      if(!val.includes('/')){ showToast('اكتب الاسم بصيغة username/repo', 'error'); return; }
+      LOCAL.settings.repo = val; saveLocal(); renderCheckStatus();
+      showToast('تم الربط', 'success');
+      renderAddModal('add');
+    });
+    return;
+  }
+  // mode === 'add'
+  modal.innerHTML = `
+    <div class="modal-head"><h3>إضافة عمل جديد</h3><button class="x-btn" data-close="addOverlay">✕</button></div>
+    <div class="modal-body">
+      <p class="hint">الإضافة تتم من تبويب <b>Actions</b> في مستودعك على GitHub — نموذج بسيط بدون أي كود. بنفتحه لك الحين، عبّي الاسم والنوع واضغط <span class="mono">Run workflow</span>. العمل بيظهر هنا بعد دقيقة أو دقيقتين تلقائيًا (حدّث الصفحة).</p>
+      <button class="btn btn-primary" id="openActionsBtn" style="width:100%;justify-content:center;">فتح صفحة الإضافة على GitHub ↗</button>
+      <p style="text-align:center;margin-top:14px;"><button class="plain-link" id="editRepoBtn">تعديل اسم المستودع</button></p>
+    </div>`;
+  document.getElementById('openActionsBtn').addEventListener('click', ()=>{
+    window.open(addItemLink(), '_blank', 'noopener');
+  });
+  document.getElementById('editRepoBtn').addEventListener('click', ()=> renderAddModal('settings'));
+}
+
+/* ===================== GLOBAL "REFRESH" (deep link to GitHub) ===================== */
+document.getElementById('refreshAllBtn').addEventListener('click', async ()=>{
+  await loadCatalog(); renderAll();
+  if(!repoSet()){ openSettingsModal(); showToast('اربط مستودعك أولًا', 'error'); return; }
+  window.open(updateNowLink(), '_blank', 'noopener');
+  showToast('فتحنا صفحة GitHub — اضغط Run workflow لتشغيل التحديث الآن', 'success');
+});
+
+/* ===================== DETAIL MODAL ===================== */
+function openDetail(id){
+  activeDetailId = id; activeDetailTab = 'overview';
+  renderDetail();
+  openOverlay('detailOverlay');
+}
+function renderDetail(){
+  const raw = findRawItem(activeDetailId);
+  if(!raw) return;
+  const item = mergedItem(raw);
+  const modal = document.getElementById('detailModal');
+  modal.innerHTML = `
+    <div class="modal-head">
+      <h3>${escapeHtml(item.title)}</h3>
+      <button class="x-btn" id="detailCloseBtn">✕</button>
+    </div>
+    <div class="detail-top">
+      <div class="detail-poster" style="${item.poster_url?`background-image:url('${escapeHtml(item.poster_url)}')`:''}"></div>
+      <div class="detail-info">
+        <h3>${escapeHtml(item.title)}</h3>
+        <div class="sub">${escapeHtml(item.year||'—')} · ${TYPE_LABELS[item.type]}</div>
+        <p>${escapeHtml(item.description||'لا يوجد وصف.')}</p>
+        <span class="status-pill" style="background:${STATUS_COLORS[item.status]}22;color:${STATUS_COLORS[item.status]}">${STATUS_LABELS[item.status]}</span>
+      </div>
+    </div>
+    <div class="tabs">
+      <button data-tab="overview" class="${activeDetailTab==='overview'?'active':''}">نظرة عامة</button>
+      <button data-tab="progress" class="${activeDetailTab==='progress'?'active':''}">تقدّمي</button>
+      <button data-tab="news" class="${activeDetailTab==='news'?'active':''}">الأخبار ${(item.news.season_news.length+item.news.release_news.length+item.news.general_news.length)>0?'●':''}</button>
+    </div>
+    <div class="tab-panel ${activeDetailTab==='overview'?'':'hidden'}" data-panel="overview">
+      <p class="hint">هذه البيانات تجي تلقائيًا من GitHub يوميًا. أي تعديل هنا يُحفظ في متصفحك فقط (كتخصيص شخصي) ولا يغيّر المصدر.</p>
+      <div class="field"><label>رابط البوستر (تخصيص شخصي)</label><input type="text" id="editPoster" value="${escapeHtml(item.poster_url)}" placeholder="https://..."></div>
+      <div class="grid2">
+        <div class="field"><label>السنة</label><input type="text" id="editYear" value="${escapeHtml(item.year)}"></div>
+        <div class="field"><label>الحالة</label>
+          <select id="editStatus">
+            ${Object.keys(STATUS_LABELS).map(s=>`<option value="${s}" ${item.status===s?'selected':''}>${STATUS_LABELS[s]}</option>`).join('')}
+          </select>
+        </div>
+      </div>
+      <div class="field"><label>الوصف</label><textarea id="editDesc">${escapeHtml(item.description)}</textarea></div>
+      <button class="btn btn-secondary" id="saveOverviewBtn" style="width:100%;justify-content:center;">حفظ التخصيص محليًا</button>
+      <div style="text-align:center;margin-top:16px;display:flex;gap:14px;justify-content:center;">
+        <button class="danger-link" id="hideItemBtn">إخفاء من أرشيفي</button>
+        <button class="danger-link" id="deleteSourceBtn">حذف نهائي من المصدر ↗</button>
+      </div>
+    </div>
+    <div class="tab-panel ${activeDetailTab==='progress'?'':'hidden'}" data-panel="progress">
+      <div class="field"><label>حالة المتابعة</label>
+        <select id="editWatchStatus">
+          ${Object.keys(WATCH_LABELS).map(s=>`<option value="${s}" ${item.progress.watchStatus===s?'selected':''}>${WATCH_LABELS[s]}</option>`).join('')}
+        </select>
+      </div>
+      ${item.type==='series'||item.type==='anime' ? `
+        <div class="grid2">
+          <div class="field"><label>الموسم الحالي</label>
+            <div class="stepper">
+              <button data-step="season" data-d="-1">−</button>
+              <span class="val" id="seasonVal">${item.progress.currentSeason}</span>
+              <button data-step="season" data-d="1">+</button>
+              <span style="color:var(--muted2);font-size:12px;">/ ${item.total_seasons||'؟'}</span>
+            </div>
+          </div>
+          <div class="field"><label>الحلقات المشاهدة</label>
+            <div class="stepper">
+              <button data-step="episode" data-d="-1">−</button>
+              <span class="val" id="episodeVal">${item.progress.watchedEpisodes}</span>
+              <button data-step="episode" data-d="1">+</button>
+              <span style="color:var(--muted2);font-size:12px;">/ ${item.total_episodes||'؟'}</span>
+            </div>
+          </div>
+        </div>` : ``}
+      <div class="field"><label>تقييمي (من 10)</label>
+        <div class="rate-row" id="rateRow">
+          ${Array.from({length:10},(_,i)=>i+1).map(n=>`<button data-rate="${n}" class="${item.progress.rating===n?'sel':''}">${n}</button>`).join('')}
+        </div>
+      </div>
+      <div class="field"><label>ملاحظاتي</label><textarea id="editNotes" placeholder="أي ملاحظات شخصية...">${escapeHtml(item.progress.notes)}</textarea></div>
+      <button class="btn btn-secondary" id="saveProgressBtn" style="width:100%;justify-content:center;">حفظ التقدّم</button>
+    </div>
+    <div class="tab-panel ${activeDetailTab==='news'?'':'hidden'}" data-panel="news">
+      <div class="news-foot" style="margin-bottom:14px;">
+        <span>آخر فحص تلقائي: ${timeAgo(raw.checkedAt)}</span>
+        <button class="btn btn-secondary" id="refreshOneBtn" style="padding:7px 12px;font-size:12.5px;">🔄 تشغيل التحديث على GitHub</button>
+      </div>
+      ${Object.keys(NEWS_LABELS).map(cat=>`
+        <div class="news-group">
+          <h4><span class="bar" style="background:${NEWS_COLORS[cat]}"></span>${NEWS_LABELS[cat]}</h4>
+          ${item.news[cat].length===0 ? `<div class="news-empty">لا يوجد جديد حتى الآن.</div>` :
+            item.news[cat].map(n=>`
+              <div class="news-item">
+                <div class="d">${escapeHtml(n.date||'')}</div>
+                <div class="s">${escapeHtml(n.summary||'')}</div>
+                ${n.source?`<div class="src">المصدر: ${escapeHtml(n.source)}</div>`:''}
+              </div>`).join('')}
+        </div>
+      `).join('')}
+    </div>
+  `;
+  wireDetailEvents(item);
+}
+function wireDetailEvents(item){
+  document.getElementById('detailCloseBtn').addEventListener('click', ()=>closeOverlay('detailOverlay'));
+  document.querySelectorAll('#detailModal .tabs button').forEach(b=>b.addEventListener('click', ()=>{
+    activeDetailTab = b.dataset.tab; renderDetail();
+  }));
+
+  const saveOverviewBtn = document.getElementById('saveOverviewBtn');
+  if(saveOverviewBtn) saveOverviewBtn.addEventListener('click', ()=>{
+    LOCAL.overrides[item.id] = {
+      poster_url: document.getElementById('editPoster').value.trim(),
+      year: document.getElementById('editYear').value.trim(),
+      status: document.getElementById('editStatus').value,
+      description: document.getElementById('editDesc').value.trim()
+    };
+    saveLocal(); renderAll(); showToast('تم حفظ التخصيص', 'success');
+  });
+
+  const hideBtn = document.getElementById('hideItemBtn');
+  if(hideBtn) hideBtn.addEventListener('click', ()=>{
+    showConfirm(`إخفاء «${item.title}» من أرشيفك في هذا المتصفح؟ يقدر يظهر مرة ثانية إذا صفّرت بياناتك المحلية.`, ()=>{
+      LOCAL.hidden[item.id] = true;
+      saveLocal();
+      closeOverlay('detailOverlay'); closeOverlay('confirmOverlay');
+      renderAll(); showToast('تم الإخفاء', 'success');
+    });
+  });
+  const delSrcBtn = document.getElementById('deleteSourceBtn');
+  if(delSrcBtn) delSrcBtn.addEventListener('click', ()=>{
+    if(!repoSet()){ closeOverlay('detailOverlay'); openSettingsModal(); showToast('اربط مستودعك أولًا', 'error'); return; }
+    window.open(editTitlesLink(), '_blank', 'noopener');
+    showToast('احذف العنصر من titles.json ثم احفظ — سيختفي من القائمة في التحديث القادم', 'success');
+  });
+
+  document.querySelectorAll('[data-step]').forEach(b=>b.addEventListener('click', ()=>{
+    const d = parseInt(b.dataset.d);
+    const p = getProgress(item.id);
+    if(b.dataset.step==='season'){ p.currentSeason = Math.max(1, p.currentSeason + d); document.getElementById('seasonVal').textContent = p.currentSeason; }
+    if(b.dataset.step==='episode'){ p.watchedEpisodes = Math.max(0, p.watchedEpisodes + d); document.getElementById('episodeVal').textContent = p.watchedEpisodes; }
+    LOCAL.progress[item.id] = p;
+  }));
+  document.querySelectorAll('[data-rate]').forEach(b=>b.addEventListener('click', ()=>{
+    const r = parseInt(b.dataset.rate);
+    const p = getProgress(item.id);
+    p.rating = p.rating===r ? null : r;
+    LOCAL.progress[item.id] = p;
+    document.querySelectorAll('[data-rate]').forEach(x=>x.classList.toggle('sel', parseInt(x.dataset.rate)===p.rating));
+  }));
+  const saveProgressBtn = document.getElementById('saveProgressBtn');
+  if(saveProgressBtn) saveProgressBtn.addEventListener('click', ()=>{
+    const p = getProgress(item.id);
+    p.watchStatus = document.getElementById('editWatchStatus').value;
+    p.notes = document.getElementById('editNotes').value;
+    p.updatedAt = new Date().toISOString();
+    LOCAL.progress[item.id] = p;
+    saveLocal(); renderAll(); showToast('تم حفظ تقدّمك', 'success');
+  });
+
+  const refreshOneBtn = document.getElementById('refreshOneBtn');
+  if(refreshOneBtn) refreshOneBtn.addEventListener('click', ()=>{
+    if(!repoSet()){ closeOverlay('detailOverlay'); openSettingsModal(); showToast('اربط مستودعك أولًا', 'error'); return; }
+    window.open(updateNowLink(), '_blank', 'noopener');
+  });
+}
+
+/* ===================== EXPORT / IMPORT ===================== */
+document.getElementById('exportBtn').addEventListener('click', ()=>{
+  const blob = new Blob([JSON.stringify(LOCAL, null, 2)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'archive-backup.json';
+  document.body.appendChild(a); a.click(); a.remove();
+  URL.revokeObjectURL(url);
+  showToast('تم تصدير نسخة احتياطية', 'success');
+});
+document.getElementById('importBtn').addEventListener('click', ()=> document.getElementById('importFile').click());
+document.getElementById('importFile').addEventListener('change', (e)=>{
+  const file = e.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = ()=>{
+    try{
+      const parsed = JSON.parse(reader.result);
+      LOCAL = Object.assign({progress:{},overrides:{},hidden:{},settings:{repo:''}}, parsed);
+      saveLocal(); renderAll();
+      showToast('تم استيراد بياناتك', 'success');
+    }catch(err){ showToast('ملف غير صالح', 'error'); }
+  };
+  reader.readAsText(file);
+  e.target.value = '';
+});
+
+/* ===================== CONFIRM ===================== */
+function showConfirm(message, onYes){
+  const box = document.getElementById('confirmBox');
+  box.innerHTML = `<p>${escapeHtml(message)}</p>
+    <div class="confirm-actions">
+      <button class="btn btn-secondary" id="confirmNo">إلغاء</button>
+      <button class="btn btn-primary" id="confirmYes" style="background:var(--danger);color:#fff;">تأكيد</button>
+    </div>`;
+  openOverlay('confirmOverlay');
+  document.getElementById('confirmNo').addEventListener('click', ()=>closeOverlay('confirmOverlay'));
+  document.getElementById('confirmYes').addEventListener('click', onYes);
+}
+document.getElementById('resetBtn').addEventListener('click', ()=>{
+  showConfirm('سيُحذف تقدّمك وتقييماتك وملاحظاتك وإخفاءك وربط المستودع — كل ذلك محفوظ في هذا المتصفح فقط (لن يتأثر أرشيفك على GitHub). متأكد؟', ()=>{
+    LOCAL = { progress:{}, overrides:{}, hidden:{}, settings:{repo:''} };
+    saveLocal();
+    closeOverlay('confirmOverlay');
+    renderAll();
+    showToast('تم التصفير', 'success');
+  });
+});
+
+/* ===================== OVERLAY CLOSE HELPERS ===================== */
+document.querySelectorAll('[data-close]').forEach(b=>b.addEventListener('click', ()=>closeOverlay(b.dataset.close)));
+document.querySelectorAll('.overlay').forEach(ov=>ov.addEventListener('click', e=>{ if(e.target===ov) closeOverlay(ov.id); }));
+
+/* ===================== COMPAT BANNER ===================== */
+function maybeShowBanner(){
+  const banner = document.getElementById('compatBanner');
+  if(location.protocol === 'file:'){
+    banner.style.display = 'block';
+    banner.innerHTML = `تفتح الملف مباشرة من جهازك — المتصفح يمنع تحميل data/catalog.json بهذي الطريقة. شغّل سيرفر محلي بسيط (مثل <span class="mono">npx serve .</span>) أو انشر الموقع على GitHub Pages.`;
+  } else if(catalogLoadFailed){
+    banner.style.display = 'block';
+    banner.innerHTML = `تعذّر تحميل data/catalog.json من هذا المسار. تأكد إن الملف موجود وإنك ناشر المجلد كامل بهيكلته الأصلية.`;
+  }
+}
+
+/* ===================== INIT ===================== */
+async function init(){
+  loadLocal();
+  await loadCatalog();
+  renderAll();
+  maybeShowBanner();
+}
+init();
+</script>
+</body>
+</html>

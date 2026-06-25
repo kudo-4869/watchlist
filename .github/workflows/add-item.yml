@@ -1,0 +1,55 @@
+name: إضافة عمل (Add Item)
+
+on:
+  workflow_dispatch:
+    inputs:
+      title:
+        description: 'اسم العمل (بالعربي أو الإنجليزي)'
+        required: true
+        type: string
+      type:
+        description: 'النوع'
+        required: true
+        type: choice
+        options:
+          - series
+          - movie
+          - anime
+          - play
+        default: series
+      year_hint:
+        description: 'سنة الإصدار (اختياري، يحسّن دقة المطابقة)'
+        required: false
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  add:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Append to titles.json
+        id: append
+        run: node scripts/add-item.mjs "${{ inputs.title }}" "${{ inputs.type }}" "${{ inputs.year_hint }}"
+
+      - name: Fetch data for the new item
+        env:
+          ONLY_ID: ${{ steps.append.outputs.new_id }}
+        run: node scripts/update.mjs
+
+      - name: Commit changes
+        run: |
+          git config user.name "watchlist-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add data/titles.json data/catalog.json
+          git commit -m "إضافة: ${{ inputs.title }}"
+          git push
