@@ -1,4 +1,38 @@
 {
-  "updatedAt": null,
-  "items": []
+  "updatedAt": "2026-06-25T07:38:51.594Z",
+  "items": [
+    {
+      "id": "alice-in-borderland-6xwr0",
+      "title": "Alice in Borderland",
+      "type": "series",
+      "year": "2020",
+      "poster_url": "https://static.tvmaze.com/uploads/images/original_untouched/589/1473249.jpg",
+      "description": "With his two friends, a video-game-obsessed young man finds himself in a strange version of Tokyo where they must compete in dangerous games to survive.Every episode lists different main cast in the opening sequence (beside the two main which are there throughout the entire series).",
+      "status": "ended",
+      "total_seasons": 3,
+      "total_episodes": 22,
+      "next_episode_date": null,
+      "seenLinks": [
+        "https://news.google.com/rss/articles/CBMifEFVX3lxTE1nNGdxcHFhQVd4WERuWW9FdXdpbWRBeEtHTFJOcTJLQXl4MjF3d0xRd0pvYTNCemgtSC1JdFA1RC1leHhVN2lnYVhuTW9OaDVMZTVFekhhM3psS0VndGlOVm5lTDdGaHlkbUVqQ0dWOGEzb2MwZnpJZkNObFo?oc=5",
+        "https://news.google.com/rss/articles/CBMijAFBVV95cUxPd2JpVE83UndRSVV1eDJXNlFNV3BvdnBTY1pPc0J3QlZhcUlDcF9zNGM2RlZhMjA4bmI3VWgwSE41b181QmhjR1dmZTRGNTRjZmFLRF9SR2dtZDRZZ0FWVHF0X0NVMnBoWk05b2gyWUlNSWZuYjVvejB4SG12aksxbW5McVppUWoxWDkxeg?oc=5"
+      ],
+      "news": {
+        "season_news": [],
+        "release_news": [],
+        "general_news": [
+          {
+            "date": "Wed, 17 Jun 2026",
+            "summary": "WATCH: The trailer for Alice in Borderland - Yahoo Lifestyle Canada",
+            "source": "Yahoo Lifestyle Canada"
+          },
+          {
+            "date": "Wed, 17 Jun 2026",
+            "summary": "WATCH: The trailer for Alice in Borderland - Yahoo",
+            "source": "Yahoo"
+          }
+        ]
+      },
+      "checkedAt": "2026-06-25T07:38:51.243Z"
+    }
+  ]
 }
