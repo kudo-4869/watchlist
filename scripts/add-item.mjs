@@ -11,7 +11,7 @@ if (!titleArg || !typeArg) {
   process.exit(1);
 }
 
-const VALID_TYPES = ['series', 'movie', 'anime', 'play'];
+const VALID_TYPES = ['series', 'movie', 'anime', 'play', 'story', 'game'];
 const type = VALID_TYPES.includes(typeArg) ? typeArg : 'series';
 
 const TITLES_PATH = 'data/titles.json';

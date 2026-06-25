@@ -19,6 +19,8 @@
     --movie:#36C2B4;
     --anime:#E2683B;
     --play:#8C7AE6;
+    --story:#D6608A;
+    --game:#6FBF73;
     --danger:#D85C5C;
     --good:#5FB87A;
     --radius:14px;
@@ -54,8 +56,8 @@
     background:var(--surface);
     border-left:1px solid var(--line);
     padding:22px 16px;
-    display:flex;flex-direction:column;gap:22px;
-    position:sticky;top:0;height:100vh;
+    display:flex;flex-direction:column;gap:18px;
+    position:sticky;top:0;height:100vh;overflow-y:auto;
   }
   .brand{display:flex;align-items:center;gap:10px;padding:0 4px;}
   .brand-mark{width:30px;height:30px;flex:none;}
@@ -65,8 +67,8 @@
   .nav{display:flex;flex-direction:column;gap:4px;}
   .nav button{
     display:flex;align-items:center;gap:10px;
-    padding:10px 12px;border-radius:10px;
-    font-size:14.5px;font-weight:500;color:var(--muted);
+    padding:9px 12px;border-radius:10px;
+    font-size:14px;font-weight:500;color:var(--muted);
     text-align:right;transition:.15s;
   }
   .nav button .dot{width:8px;height:8px;border-radius:50%;background:var(--muted2);flex:none;}
@@ -104,6 +106,8 @@
   .btn-secondary{background:var(--surface2);color:var(--text);border:1px solid var(--line);}
   .btn-secondary:hover{background:#2e313c;}
   .btn:disabled{opacity:.5;cursor:not-allowed;}
+  .spin{display:inline-block;width:13px;height:13px;border-radius:50%;border:2px solid currentColor;border-left-color:transparent;animation:spin .7s linear infinite;}
+  @keyframes spin{to{transform:rotate(360deg);}}
 
   /* ===== grid & ticket cards ===== */
   .grid{
@@ -123,12 +127,27 @@
   .poster.no-img::after{content:'🎬';font-size:30px;opacity:.35;}
   .type-chip{
     position:absolute;top:8px;right:8px;font-size:10.5px;font-weight:700;
-    padding:3px 8px;border-radius:20px;color:#10110f;
+    padding:3px 8px;border-radius:20px;color:#10110f;z-index:2;
   }
   .news-dot{
     position:absolute;top:8px;left:8px;width:9px;height:9px;border-radius:50%;
-    background:var(--anime);box-shadow:0 0 0 3px rgba(226,104,59,.25);
+    background:var(--anime);box-shadow:0 0 0 3px rgba(226,104,59,.25);z-index:2;
   }
+  .status-badge-onposter{
+    position:absolute;bottom:7px;left:7px;font-size:10px;font-weight:700;
+    padding:2px 8px;border-radius:20px;z-index:2;backdrop-filter:blur(2px);
+  }
+  .quick-actions{position:absolute;bottom:7px;right:7px;display:flex;gap:5px;z-index:2;}
+  .qa-btn{
+    width:25px;height:25px;border-radius:50%;background:rgba(10,11,14,.78);
+    border:1px solid var(--line);color:var(--muted);font-size:12.5px;
+    display:flex;align-items:center;justify-content:center;backdrop-filter:blur(2px);
+    line-height:1;
+  }
+  .qa-btn:hover{background:rgba(10,11,14,.92);color:var(--text);}
+  .qa-btn.qa-active{border-color:transparent;}
+  .qa-btn.qa-active[data-qa="completed"]{background:var(--good);color:#0d130f;}
+  .qa-btn.qa-active[data-qa="dropped"]{background:var(--danger);color:#fff;}
   .perf{
     height:1px;position:relative;
     background:repeating-linear-gradient(to left,var(--line) 0 6px,transparent 6px 12px);
@@ -176,18 +195,22 @@
 
   .field{margin-bottom:14px;}
   .field label{display:block;font-size:12.5px;color:var(--muted);margin-bottom:6px;font-weight:600;}
-  .field input[type=text],.field textarea,.field select{
+  .field input[type=text],.field input[type=password],.field textarea,.field select{
     width:100%;background:var(--surface2);border:1px solid var(--line);color:var(--text);
     padding:10px 12px;border-radius:10px;font-size:14px;font-family:inherit;
   }
   .field textarea{resize:vertical;min-height:60px;}
   .hint{font-size:12px;color:var(--muted2);line-height:1.6;margin:0 0 14px;}
+  .hint a{color:var(--series);text-decoration:underline;}
   .type-pick{display:flex;gap:8px;flex-wrap:wrap;}
   .type-pick button{
     padding:8px 14px;border-radius:10px;font-size:13px;font-weight:600;
     background:var(--surface2);border:1px solid var(--line);color:var(--muted);
   }
   .type-pick button.sel{color:#10110f;border-color:transparent;}
+  details.adv{margin:6px 0 14px;}
+  details.adv summary{font-size:12.5px;color:var(--muted2);cursor:pointer;}
+  details.adv > div{margin-top:10px;}
 
   /* detail modal */
   .detail-top{display:flex;gap:16px;padding:20px;}
@@ -232,7 +255,7 @@
   .toast{
     background:var(--surface2);border:1px solid var(--line);color:var(--text);
     padding:11px 16px;border-radius:10px;font-size:13.5px;box-shadow:0 8px 20px -8px rgba(0,0,0,.5);
-    animation:in .2s ease;max-width:320px;
+    animation:in .2s ease;max-width:340px;
   }
   .toast.error{border-color:var(--danger);}
   .toast.success{border-color:var(--good);}
@@ -287,7 +310,7 @@
         <p id="sectionSub">كل ما تتابعه في مكان واحد</p>
       </div>
       <div class="actions">
-        <button class="btn btn-secondary" id="refreshAllBtn">🔄 تحديث الآن على GitHub</button>
+        <button class="btn btn-secondary" id="refreshAllBtn">🔄 تحديث الآن</button>
         <button class="btn btn-primary" id="addBtn">＋ إضافة عمل</button>
       </div>
     </div>
@@ -297,34 +320,24 @@
 
 <div id="toasts"></div>
 
-<!-- Add / Settings Modal -->
-<div class="overlay" id="addOverlay">
-  <div class="modal" id="addModal"></div>
-</div>
-
-<!-- Detail Modal -->
-<div class="overlay" id="detailOverlay">
-  <div class="modal" id="detailModal"></div>
-</div>
-
-<!-- Confirm Modal -->
-<div class="overlay" id="confirmOverlay">
-  <div class="confirm-box" id="confirmBox"></div>
-</div>
+<div class="overlay" id="addOverlay"><div class="modal" id="addModal"></div></div>
+<div class="overlay" id="detailOverlay"><div class="modal" id="detailModal"></div></div>
+<div class="overlay" id="confirmOverlay"><div class="confirm-box" id="confirmBox"></div></div>
 
 <script>
 /* ===================== CONFIG ===================== */
-const TYPE_LABELS = {series:'مسلسل', movie:'فيلم', anime:'أنمي', play:'مسرحية'};
-const TYPE_COLORS = {series:'var(--series)', movie:'var(--movie)', anime:'var(--anime)', play:'var(--play)'};
-const STATUS_LABELS = {ongoing:'مستمر', ended:'منتهي', cancelled:'ملغى', unknown:'غير معروف'};
-const STATUS_COLORS = {ongoing:'var(--good)', ended:'var(--muted2)', cancelled:'var(--danger)', unknown:'var(--muted2)'};
-const WATCH_LABELS = {planning:'مخطط له', watching:'أتابعه الآن', completed:'مكتمل', onhold:'متوقف مؤقتًا', dropped:'متوقف نهائيًا'};
+const TYPE_LABELS = {series:'مسلسل', movie:'فيلم', anime:'أنمي', play:'مسرحية', story:'قصة', game:'لعبة'};
+const TYPE_COLORS = {series:'var(--series)', movie:'var(--movie)', anime:'var(--anime)', play:'var(--play)', story:'var(--story)', game:'var(--game)'};
+const AUTO_FETCH_TYPES = new Set(['series','movie','anime']);
+const STATUS_LABELS = {ongoing:'مستمر', completed:'مكتمل', unclear:'غير منتهي', cancelled:'تكنسل'};
+const STATUS_COLORS = {ongoing:'var(--good)', completed:'var(--movie)', unclear:'var(--series)', cancelled:'var(--danger)'};
+const WATCH_LABELS = {planning:'مخطط له', watching:'أتابعه الآن', completed:'مكتمل', onhold:'متوقف مؤقتًا', dropped:'سحبت عليه'};
 const NEWS_LABELS = {season_news:'مواسم جديدة / إلغاء', release_news:'مواعيد العرض والتأجيل', general_news:'أخبار عامة'};
 const NEWS_COLORS = {season_news:'var(--anime)', release_news:'var(--movie)', general_news:'var(--play)'};
 const LOCAL_KEY = 'watchlist_local_v1';
 
 let CATALOG = { updatedAt: null, items: [] };
-let LOCAL = { progress:{}, overrides:{}, hidden:{}, settings:{ repo:'' } };
+let LOCAL = { progress:{}, overrides:{}, hidden:{}, settings:{ repo:'', token:'' } };
 let activeSection = 'all';
 let activeDetailId = null;
 let activeDetailTab = 'overview';
@@ -336,8 +349,8 @@ function loadLocal(){
     const raw = localStorage.getItem(LOCAL_KEY);
     if(raw){
       const parsed = JSON.parse(raw);
-      LOCAL = Object.assign({progress:{},overrides:{},hidden:{},settings:{repo:''}}, parsed);
-      LOCAL.settings = Object.assign({repo:''}, LOCAL.settings);
+      LOCAL = Object.assign({progress:{},overrides:{},hidden:{},settings:{repo:'',token:''}}, parsed);
+      LOCAL.settings = Object.assign({repo:'',token:''}, LOCAL.settings);
     }
   }catch(e){ console.error(e); }
 }
@@ -375,15 +388,19 @@ function showToast(msg, type){
   el.className = 'toast'+(type?' '+type:'');
   el.textContent = msg;
   document.getElementById('toasts').appendChild(el);
-  setTimeout(()=>el.remove(), 4200);
+  setTimeout(()=>el.remove(), 4800);
 }
 function openOverlay(id){ document.getElementById(id).classList.add('show'); }
 function closeOverlay(id){ document.getElementById(id).classList.remove('show'); }
 
 function repoSet(){ return !!(LOCAL.settings.repo && LOCAL.settings.repo.includes('/')); }
+function tokenSet(){ return !!(LOCAL.settings.token && LOCAL.settings.token.length > 10); }
 function addItemLink(){ return `https://github.com/${LOCAL.settings.repo}/actions/workflows/add-item.yml`; }
 function updateNowLink(){ return `https://github.com/${LOCAL.settings.repo}/actions/workflows/daily-update.yml`; }
 function editTitlesLink(){ return `https://github.com/${LOCAL.settings.repo}/edit/main/data/titles.json`; }
+
+function utf8ToBase64(str){ return btoa(unescape(encodeURIComponent(str))); }
+function base64ToUtf8(str){ return decodeURIComponent(escape(atob(str))); }
 
 function getProgress(id){
   return LOCAL.progress[id] || {watchStatus:'planning', currentSeason:1, currentEpisode:0, watchedEpisodes:0, rating:null, notes:'', updatedAt:null};
@@ -394,6 +411,7 @@ function mergedItem(catalogItem){
   const merged = Object.assign({}, catalogItem, ov);
   merged.progress = getProgress(catalogItem.id);
   merged.news = catalogItem.news || {season_news:[],release_news:[],general_news:[]};
+  if(!merged.status) merged.status = 'unclear';
   return merged;
 }
 function visibleItems(){
@@ -402,17 +420,18 @@ function visibleItems(){
     .map(mergedItem);
 }
 function findRawItem(id){ return (CATALOG.items||[]).find(i=>i.id===id); }
+function slugify(text, type_){
+  let t = (text||'').trim().toLowerCase().replace(/[^\w\u0600-\u06FF]+/g,'-').replace(/^-+|-+$/g,'');
+  if(!t) t = 'item';
+  return `${t}-${type_}`;
+}
 
 /* ===================== NAV / RENDER ===================== */
 function sectionCounts(){
   const all = visibleItems();
-  return {
-    all: all.length,
-    series: all.filter(i=>i.type==='series').length,
-    movie: all.filter(i=>i.type==='movie').length,
-    anime: all.filter(i=>i.type==='anime').length,
-    play: all.filter(i=>i.type==='play').length
-  };
+  const c = { all: all.length };
+  Object.keys(TYPE_LABELS).forEach(t => { c[t] = all.filter(i=>i.type===t).length; });
+  return c;
 }
 function renderNav(){
   const counts = sectionCounts();
@@ -421,7 +440,9 @@ function renderNav(){
     {key:'series', label:'مسلسلات', color:'var(--series)'},
     {key:'movie', label:'أفلام', color:'var(--movie)'},
     {key:'anime', label:'أنمي', color:'var(--anime)'},
-    {key:'play', label:'مسرحيات', color:'var(--play)'}
+    {key:'play', label:'مسرحيات', color:'var(--play)'},
+    {key:'story', label:'قصص', color:'var(--story)'},
+    {key:'game', label:'ألعاب', color:'var(--game)'}
   ];
   const nav = document.getElementById('nav');
   nav.innerHTML = sections.map(s=>`
@@ -435,13 +456,15 @@ function renderNav(){
   }));
 }
 function renderTopbar(){
-  const titles = {all:'الكل', series:'مسلسلات', movie:'أفلام', anime:'أنمي', play:'مسرحيات'};
+  const titles = {all:'الكل', series:'مسلسلات', movie:'أفلام', anime:'أنمي', play:'مسرحيات', story:'قصص', game:'ألعاب'};
   const subs = {
     all:'كل ما تتابعه في مكان واحد',
     series:'تتبّع مواسمك وحلقاتك',
     movie:'الأفلام التي شاهدتها أو تخطط لها',
     anime:'متابعة الحلقات والمواسم',
-    play:'المسرحيات والعروض التي تتابعها'
+    play:'المسرحيات والعروض التي تتابعها',
+    story:'القصص التي استمعت لها',
+    game:'الألعاب التي لعبتها'
   };
   document.getElementById('sectionTitle').textContent = titles[activeSection];
   document.getElementById('sectionSub').textContent = subs[activeSection];
@@ -449,13 +472,14 @@ function renderTopbar(){
 function renderCheckStatus(){
   const el = document.getElementById('checkStatus');
   const repoText = repoSet() ? `<span class="repo-link" id="repoLinkBtn">${escapeHtml(LOCAL.settings.repo)}</span>` : `<span class="repo-link" id="repoLinkBtn">غير محدد — اضغط للربط</span>`;
-  el.innerHTML = `<b>آخر تحديث من GitHub:</b><br>${timeAgo(CATALOG.updatedAt)}<br><br><b>المستودع:</b><br>${repoText}`;
+  const tokenText = tokenSet() ? '<span style="color:var(--good)">مفعّلة ✓</span>' : '<span style="color:var(--muted2)">غير مفعّلة</span>';
+  el.innerHTML = `<b>آخر تحديث من GitHub:</b><br>${timeAgo(CATALOG.updatedAt)}<br><br><b>المستودع:</b><br>${repoText}<br><br><b>الإضافة المباشرة:</b><br>${tokenText}`;
   const btn = document.getElementById('repoLinkBtn');
   if(btn) btn.addEventListener('click', openSettingsModal);
 }
 function progressFraction(item){
   const p = item.progress;
-  if(item.type==='movie' || item.type==='play') return p.watchStatus==='completed' ? 1 : 0;
+  if(item.type==='movie' || item.type==='play' || item.type==='story' || item.type==='game') return p.watchStatus==='completed' ? 1 : 0;
   const total = item.total_episodes || (item.total_seasons ? item.total_seasons*12 : null);
   if(!total) return p.watchStatus==='completed' ? 1 : 0;
   return Math.max(0, Math.min(1, (p.watchedEpisodes||0)/total));
@@ -474,11 +498,17 @@ function renderGrid(){
   grid.innerHTML = list.map(item=>{
     const frac = progressFraction(item);
     const hasNews = (item.news.season_news.length + item.news.release_news.length + item.news.general_news.length) > 0;
+    const showStatus = (item.type==='series' || item.type==='anime') || item.status !== 'unclear';
     return `
     <div class="card" data-id="${item.id}">
       <div class="poster ${item.poster_url?'':'no-img'}" style="${item.poster_url?`background-image:url('${escapeHtml(item.poster_url)}')`:''}">
         <span class="type-chip" style="background:${TYPE_COLORS[item.type]}">${TYPE_LABELS[item.type]}</span>
         ${hasNews?'<span class="news-dot" title="أخبار جديدة"></span>':''}
+        ${showStatus?`<span class="status-badge-onposter" style="background:${STATUS_COLORS[item.status]}33;color:${STATUS_COLORS[item.status]}">${STATUS_LABELS[item.status]}</span>`:''}
+        <div class="quick-actions">
+          <button class="qa-btn ${item.progress.watchStatus==='completed'?'qa-active':''}" data-qa="completed" title="شاهدته">✓</button>
+          <button class="qa-btn ${item.progress.watchStatus==='dropped'?'qa-active':''}" data-qa="dropped" title="سحبت عليه">↩</button>
+        </div>
       </div>
       <div class="perf"></div>
       <div class="stub">
@@ -492,6 +522,18 @@ function renderGrid(){
     </div>`;
   }).join('');
   grid.querySelectorAll('.card').forEach(c=>c.addEventListener('click', ()=> openDetail(c.dataset.id)));
+  grid.querySelectorAll('.qa-btn').forEach(b=>b.addEventListener('click', (e)=>{
+    e.stopPropagation();
+    const card = b.closest('.card');
+    const id = card.dataset.id;
+    const action = b.dataset.qa;
+    const p = getProgress(id);
+    p.watchStatus = (p.watchStatus===action) ? 'planning' : action;
+    p.updatedAt = new Date().toISOString();
+    LOCAL.progress[id] = p;
+    saveLocal();
+    renderAll();
+  }));
 }
 function renderAll(){ renderNav(); renderTopbar(); renderGrid(); renderCheckStatus(); }
 
@@ -499,47 +541,153 @@ function renderAll(){ renderNav(); renderTopbar(); renderGrid(); renderCheckStat
 let addType = 'series';
 function openSettingsModal(){ renderAddModal('settings'); openOverlay('addOverlay'); }
 document.getElementById('addBtn').addEventListener('click', ()=>{
-  addType = ['series','movie','anime','play'].includes(activeSection) ? activeSection : 'series';
-  renderAddModal(repoSet() ? 'add' : 'settings');
+  addType = TYPE_LABELS[activeSection] ? activeSection : 'series';
+  if(tokenSet() && repoSet()) renderAddModal('add-form');
+  else if(repoSet()) renderAddModal('add-link');
+  else renderAddModal('settings');
   openOverlay('addOverlay');
 });
+
 function renderAddModal(mode){
   const modal = document.getElementById('addModal');
+
   if(mode === 'settings'){
     modal.innerHTML = `
       <div class="modal-head"><h3>ربط مستودع GitHub</h3><button class="x-btn" data-close="addOverlay">✕</button></div>
       <div class="modal-body">
-        <p class="hint">أدخل اسم مستودعك بصيغة <span class="mono">username/repo</span> (نفس المستودع اللي رفعت فيه ملفات هذا الموقع). نحفظه في متصفحك فقط، ونستخدمه لفتح صفحات GitHub Actions المناسبة بضغطة واحدة.</p>
+        <p class="hint">أدخل اسم مستودعك بصيغة <span class="mono">username/repo</span> (نفس المستودع اللي رفعت فيه ملفات هذا الموقع).</p>
         <div class="field"><label>اسم المستودع</label><input type="text" id="repoInput" placeholder="username/watchlist" value="${escapeHtml(LOCAL.settings.repo||'')}"></div>
+
+        <p class="hint">اختياري: لإضافة الأعمال مباشرة من هذا الموقع بضغطة واحدة (بدون الذهاب لـ GitHub كل مرة)، أنشئ <a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener">Fine-grained Personal Access Token</a> وحدد فيه:</p>
+        <p class="hint" style="margin-top:-10px;">
+          • Repository access ← Only select repositories ← مستودعك فقط<br>
+          • Permissions ← Contents: Read and write<br>
+          • Permissions ← Actions: Read and write<br>
+          ⚠️ يُحفظ في متصفحك فقط، ولا تستخدمه على جهاز عام أو مشترك.
+        </p>
+        <div class="field"><label>GitHub Token (اختياري)</label><input type="password" id="tokenInput" placeholder="github_pat_..." value="${escapeHtml(LOCAL.settings.token||'')}"></div>
+
         <button class="btn btn-primary" id="saveRepoBtn" style="width:100%;justify-content:center;">حفظ والمتابعة</button>
       </div>`;
     document.getElementById('saveRepoBtn').addEventListener('click', ()=>{
       const val = document.getElementById('repoInput').value.trim().replace(/^https?:\/\/github\.com\//,'').replace(/\/$/,'');
       if(!val.includes('/')){ showToast('اكتب الاسم بصيغة username/repo', 'error'); return; }
-      LOCAL.settings.repo = val; saveLocal(); renderCheckStatus();
-      showToast('تم الربط', 'success');
-      renderAddModal('add');
+      LOCAL.settings.repo = val;
+      LOCAL.settings.token = document.getElementById('tokenInput').value.trim();
+      saveLocal(); renderCheckStatus();
+      showToast('تم الحفظ', 'success');
+      renderAddModal(tokenSet() ? 'add-form' : 'add-link');
     });
     return;
   }
-  // mode === 'add'
+
+  if(mode === 'add-link'){
+    modal.innerHTML = `
+      <div class="modal-head"><h3>إضافة عمل جديد</h3><button class="x-btn" data-close="addOverlay">✕</button></div>
+      <div class="modal-body">
+        <p class="hint">الإضافة تتم من تبويب <b>Actions</b> في مستودعك على GitHub — نموذج بسيط بدون أي كود. بنفتحه لك الحين، عبّي الاسم والنوع واضغط <span class="mono">Run workflow</span>. العمل بيظهر هنا بعد دقيقة أو دقيقتين (حدّث الصفحة).</p>
+        <p class="hint">💡 ودّك تضيف بضغطة واحدة من هنا مباشرة؟ <button class="plain-link" id="setupTokenBtn" style="display:inline">فعّل ذلك من الإعدادات</button></p>
+        <button class="btn btn-primary" id="openActionsBtn" style="width:100%;justify-content:center;">فتح صفحة الإضافة على GitHub ↗</button>
+      </div>`;
+    document.getElementById('openActionsBtn').addEventListener('click', ()=> window.open(addItemLink(), '_blank', 'noopener'));
+    document.getElementById('setupTokenBtn').addEventListener('click', ()=> renderAddModal('settings'));
+    return;
+  }
+
+  // mode === 'add-form' (direct commit via GitHub API)
   modal.innerHTML = `
     <div class="modal-head"><h3>إضافة عمل جديد</h3><button class="x-btn" data-close="addOverlay">✕</button></div>
     <div class="modal-body">
-      <p class="hint">الإضافة تتم من تبويب <b>Actions</b> في مستودعك على GitHub — نموذج بسيط بدون أي كود. بنفتحه لك الحين، عبّي الاسم والنوع واضغط <span class="mono">Run workflow</span>. العمل بيظهر هنا بعد دقيقة أو دقيقتين تلقائيًا (حدّث الصفحة).</p>
-      <button class="btn btn-primary" id="openActionsBtn" style="width:100%;justify-content:center;">فتح صفحة الإضافة على GitHub ↗</button>
-      <p style="text-align:center;margin-top:14px;"><button class="plain-link" id="editRepoBtn">تعديل اسم المستودع</button></p>
+      <div class="field"><label>النوع</label><div class="type-pick" id="addTypePick"></div></div>
+      <div class="field"><label>اسم العمل</label><input type="text" id="addTitleInput" placeholder="اكتب الاسم..."></div>
+      <details class="adv"><summary>سنة الإصدار (اختياري، يحسّن دقة المطابقة)</summary>
+        <div><input type="text" id="addYearInput" placeholder="مثال: 2023"></div>
+      </details>
+      <button class="btn btn-primary" id="addSubmitBtn" style="width:100%;justify-content:center;">إضافة الآن</button>
+      <p style="text-align:center;margin-top:14px;"><button class="plain-link" id="editRepoBtn2">تعديل الإعدادات</button></p>
     </div>`;
-  document.getElementById('openActionsBtn').addEventListener('click', ()=>{
-    window.open(addItemLink(), '_blank', 'noopener');
-  });
-  document.getElementById('editRepoBtn').addEventListener('click', ()=> renderAddModal('settings'));
+  renderAddTypePick();
+  document.getElementById('editRepoBtn2').addEventListener('click', ()=> renderAddModal('settings'));
+  document.getElementById('addSubmitBtn').addEventListener('click', submitAddDirect);
+  document.getElementById('addTitleInput').addEventListener('keydown', e=>{ if(e.key==='Enter') submitAddDirect(); });
+  setTimeout(()=>{ const el = document.getElementById('addTitleInput'); if(el) el.focus(); }, 50);
+}
+function renderAddTypePick(){
+  const wrap = document.getElementById('addTypePick');
+  if(!wrap) return;
+  wrap.innerHTML = Object.keys(TYPE_LABELS).map(t=>`
+    <button data-t="${t}" class="${addType===t?'sel':''}" style="${addType===t?`background:${TYPE_COLORS[t]};color:#10110f`:''}">${TYPE_LABELS[t]}</button>
+  `).join('');
+  wrap.querySelectorAll('button').forEach(b=>b.addEventListener('click', ()=>{ addType=b.dataset.t; renderAddTypePick(); }));
 }
 
-/* ===================== GLOBAL "REFRESH" (deep link to GitHub) ===================== */
+/* ---------- direct GitHub commit (uses stored fine-grained PAT) ---------- */
+async function githubApi(path, options){
+  const res = await fetch(`https://api.github.com${path}`, Object.assign({
+    headers: Object.assign({
+      'Authorization': `Bearer ${LOCAL.settings.token}`,
+      'Accept': 'application/vnd.github+json'
+    }, (options && options.headers) || {})
+  }, options || {}));
+  return res;
+}
+async function submitAddDirect(){
+  const title = document.getElementById('addTitleInput').value.trim();
+  const yearInput = document.getElementById('addYearInput');
+  const year_hint = yearInput ? yearInput.value.trim() : '';
+  if(!title){ showToast('اكتب اسم العمل أول', 'error'); return; }
+  const btn = document.getElementById('addSubmitBtn');
+  btn.disabled = true; btn.innerHTML = '<span class="spin"></span> يضيف...';
+  try{
+    const path = `/repos/${LOCAL.settings.repo}/contents/data/titles.json`;
+    const getRes = await githubApi(path);
+    if(!getRes.ok){
+      if(getRes.status===401 || getRes.status===403) throw new Error('التوكن غير صحيح أو لا يملك صلاحية كافية');
+      throw new Error('تعذّر قراءة titles.json (status '+getRes.status+')');
+    }
+    const getData = await getRes.json();
+    const currentArr = JSON.parse(base64ToUtf8(getData.content.replace(/\n/g,'')));
+    const id = slugify(title, addType) + '-' + Date.now().toString(36).slice(-4);
+    currentArr.push({ id, title, type: addType, year_hint });
+    const newContent = utf8ToBase64(JSON.stringify(currentArr, null, 2) + '\n');
+    const putRes = await githubApi(path, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message: `إضافة: ${title}`, content: newContent, sha: getData.sha, branch: 'main' })
+    });
+    if(!putRes.ok){
+      throw new Error('فشل الحفظ في GitHub (status '+putRes.status+')');
+    }
+    // trigger an immediate processing run (best effort — needs Actions:write on the token)
+    try{
+      await githubApi(`/repos/${LOCAL.settings.repo}/actions/workflows/daily-update.yml/dispatches`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ref: 'main' })
+      });
+    }catch(e){ /* non-fatal */ }
+    closeOverlay('addOverlay');
+    showToast('تمت الإضافة! بيظهر العمل ببياناته خلال دقيقة أو دقيقتين، حدّث الصفحة بعدها', 'success');
+  }catch(e){
+    console.error(e);
+    showToast(e.message || 'حدث خطأ غير متوقع', 'error');
+  }finally{
+    btn.disabled=false; btn.innerHTML='إضافة الآن';
+  }
+}
+
+/* ===================== GLOBAL "REFRESH" ===================== */
 document.getElementById('refreshAllBtn').addEventListener('click', async ()=>{
   await loadCatalog(); renderAll();
   if(!repoSet()){ openSettingsModal(); showToast('اربط مستودعك أولًا', 'error'); return; }
+  if(tokenSet()){
+    try{
+      const res = await githubApi(`/repos/${LOCAL.settings.repo}/actions/workflows/daily-update.yml/dispatches`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ref: 'main' })
+      });
+      if(res.ok){ showToast('تم تشغيل التحديث على GitHub — راجع الصفحة بعد دقيقة أو دقيقتين', 'success'); return; }
+    }catch(e){ /* fall through to deep link */ }
+  }
   window.open(updateNowLink(), '_blank', 'noopener');
   showToast('فتحنا صفحة GitHub — اضغط Run workflow لتشغيل التحديث الآن', 'success');
 });
@@ -555,6 +703,7 @@ function renderDetail(){
   if(!raw) return;
   const item = mergedItem(raw);
   const modal = document.getElementById('detailModal');
+  const showSeasonFields = (item.type==='series' || item.type==='anime');
   modal.innerHTML = `
     <div class="modal-head">
       <h3>${escapeHtml(item.title)}</h3>
@@ -575,8 +724,8 @@ function renderDetail(){
       <button data-tab="news" class="${activeDetailTab==='news'?'active':''}">الأخبار ${(item.news.season_news.length+item.news.release_news.length+item.news.general_news.length)>0?'●':''}</button>
     </div>
     <div class="tab-panel ${activeDetailTab==='overview'?'':'hidden'}" data-panel="overview">
-      <p class="hint">هذه البيانات تجي تلقائيًا من GitHub يوميًا. أي تعديل هنا يُحفظ في متصفحك فقط (كتخصيص شخصي) ولا يغيّر المصدر.</p>
-      <div class="field"><label>رابط البوستر (تخصيص شخصي)</label><input type="text" id="editPoster" value="${escapeHtml(item.poster_url)}" placeholder="https://..."></div>
+      <p class="hint">${AUTO_FETCH_TYPES.has(item.type) ? 'هذه البيانات تجي تلقائيًا من GitHub. أي تعديل هنا يُحفظ في متصفحك فقط كتخصيص شخصي.' : 'هذا النوع بدون مصدر بيانات تلقائي — عبّي البيانات يدويًا، تُحفظ في متصفحك.'}</p>
+      <div class="field"><label>رابط البوستر</label><input type="text" id="editPoster" value="${escapeHtml(item.poster_url)}" placeholder="https://..."></div>
       <div class="grid2">
         <div class="field"><label>السنة</label><input type="text" id="editYear" value="${escapeHtml(item.year)}"></div>
         <div class="field"><label>الحالة</label>
@@ -598,7 +747,7 @@ function renderDetail(){
           ${Object.keys(WATCH_LABELS).map(s=>`<option value="${s}" ${item.progress.watchStatus===s?'selected':''}>${WATCH_LABELS[s]}</option>`).join('')}
         </select>
       </div>
-      ${item.type==='series'||item.type==='anime' ? `
+      ${showSeasonFields ? `
         <div class="grid2">
           <div class="field"><label>الموسم الحالي</label>
             <div class="stepper">
@@ -628,7 +777,7 @@ function renderDetail(){
     <div class="tab-panel ${activeDetailTab==='news'?'':'hidden'}" data-panel="news">
       <div class="news-foot" style="margin-bottom:14px;">
         <span>آخر فحص تلقائي: ${timeAgo(raw.checkedAt)}</span>
-        <button class="btn btn-secondary" id="refreshOneBtn" style="padding:7px 12px;font-size:12.5px;">🔄 تشغيل التحديث على GitHub</button>
+        <button class="btn btn-secondary" id="refreshOneBtn" style="padding:7px 12px;font-size:12.5px;">🔄 تشغيل التحديث</button>
       </div>
       ${Object.keys(NEWS_LABELS).map(cat=>`
         <div class="news-group">
@@ -665,7 +814,7 @@ function wireDetailEvents(item){
 
   const hideBtn = document.getElementById('hideItemBtn');
   if(hideBtn) hideBtn.addEventListener('click', ()=>{
-    showConfirm(`إخفاء «${item.title}» من أرشيفك في هذا المتصفح؟ يقدر يظهر مرة ثانية إذا صفّرت بياناتك المحلية.`, ()=>{
+    showConfirm(`إخفاء «${item.title}» من أرشيفك في هذا المتصفح؟`, ()=>{
       LOCAL.hidden[item.id] = true;
       saveLocal();
       closeOverlay('detailOverlay'); closeOverlay('confirmOverlay');
@@ -676,7 +825,7 @@ function wireDetailEvents(item){
   if(delSrcBtn) delSrcBtn.addEventListener('click', ()=>{
     if(!repoSet()){ closeOverlay('detailOverlay'); openSettingsModal(); showToast('اربط مستودعك أولًا', 'error'); return; }
     window.open(editTitlesLink(), '_blank', 'noopener');
-    showToast('احذف العنصر من titles.json ثم احفظ — سيختفي من القائمة في التحديث القادم', 'success');
+    showToast('احذف العنصر من titles.json ثم احفظ — سيختفي من القائمة بالتحديث القادم', 'success');
   });
 
   document.querySelectorAll('[data-step]').forEach(b=>b.addEventListener('click', ()=>{
@@ -704,21 +853,33 @@ function wireDetailEvents(item){
   });
 
   const refreshOneBtn = document.getElementById('refreshOneBtn');
-  if(refreshOneBtn) refreshOneBtn.addEventListener('click', ()=>{
+  if(refreshOneBtn) refreshOneBtn.addEventListener('click', async ()=>{
     if(!repoSet()){ closeOverlay('detailOverlay'); openSettingsModal(); showToast('اربط مستودعك أولًا', 'error'); return; }
+    if(tokenSet()){
+      try{
+        const res = await githubApi(`/repos/${LOCAL.settings.repo}/actions/workflows/daily-update.yml/dispatches`, {
+          method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ref:'main'})
+        });
+        if(res.ok){ showToast('تم تشغيل التحديث — راجع بعد دقيقة أو دقيقتين', 'success'); return; }
+      }catch(e){ /* fall through */ }
+    }
     window.open(updateNowLink(), '_blank', 'noopener');
   });
 }
 
 /* ===================== EXPORT / IMPORT ===================== */
 document.getElementById('exportBtn').addEventListener('click', ()=>{
-  const blob = new Blob([JSON.stringify(LOCAL, null, 2)], {type:'application/json'});
+  const exportable = {
+    progress: LOCAL.progress, overrides: LOCAL.overrides, hidden: LOCAL.hidden,
+    settings: { repo: LOCAL.settings.repo }   // token intentionally excluded from backups
+  };
+  const blob = new Blob([JSON.stringify(exportable, null, 2)], {type:'application/json'});
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url; a.download = 'archive-backup.json';
   document.body.appendChild(a); a.click(); a.remove();
   URL.revokeObjectURL(url);
-  showToast('تم تصدير نسخة احتياطية', 'success');
+  showToast('تم تصدير نسخة احتياطية (بدون التوكن لأمانك)', 'success');
 });
 document.getElementById('importBtn').addEventListener('click', ()=> document.getElementById('importFile').click());
 document.getElementById('importFile').addEventListener('change', (e)=>{
@@ -728,9 +889,12 @@ document.getElementById('importFile').addEventListener('change', (e)=>{
   reader.onload = ()=>{
     try{
       const parsed = JSON.parse(reader.result);
-      LOCAL = Object.assign({progress:{},overrides:{},hidden:{},settings:{repo:''}}, parsed);
+      LOCAL.progress = Object.assign({}, LOCAL.progress, parsed.progress||{});
+      LOCAL.overrides = Object.assign({}, LOCAL.overrides, parsed.overrides||{});
+      LOCAL.hidden = Object.assign({}, LOCAL.hidden, parsed.hidden||{});
+      if(parsed.settings && parsed.settings.repo) LOCAL.settings.repo = parsed.settings.repo;
       saveLocal(); renderAll();
-      showToast('تم استيراد بياناتك', 'success');
+      showToast('تم استيراد بياناتك (تمت إضافتها لما هو موجود، بدون استبدال)', 'success');
     }catch(err){ showToast('ملف غير صالح', 'error'); }
   };
   reader.readAsText(file);
@@ -750,8 +914,8 @@ function showConfirm(message, onYes){
   document.getElementById('confirmYes').addEventListener('click', onYes);
 }
 document.getElementById('resetBtn').addEventListener('click', ()=>{
-  showConfirm('سيُحذف تقدّمك وتقييماتك وملاحظاتك وإخفاءك وربط المستودع — كل ذلك محفوظ في هذا المتصفح فقط (لن يتأثر أرشيفك على GitHub). متأكد؟', ()=>{
-    LOCAL = { progress:{}, overrides:{}, hidden:{}, settings:{repo:''} };
+  showConfirm('سيُحذف تقدّمك وتقييماتك وملاحظاتك وإعداداتك المحفوظة في هذا المتصفح فقط (لن يتأثر أرشيفك على GitHub). متأكد؟', ()=>{
+    LOCAL = { progress:{}, overrides:{}, hidden:{}, settings:{repo:'',token:''} };
     saveLocal();
     closeOverlay('confirmOverlay');
     renderAll();

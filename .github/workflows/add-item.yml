@@ -16,6 +16,8 @@ on:
           - movie
           - anime
           - play
+          - story
+          - game
         default: series
       year_hint:
         description: 'سنة الإصدار (اختياري، يحسّن دقة المطابقة)'
