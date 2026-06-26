@@ -4,7 +4,12 @@ on:
   schedule:
     # 03:00 UTC ≈ 06:00 بتوقيت السعودية/الإمارات. عدّل الرقم إذا تبغى توقيت مختلف.
     - cron: '0 3 * * *'
-  workflow_dispatch: {}
+  workflow_dispatch:
+    inputs:
+      id:
+        description: 'معرّف عمل واحد فقط لتحديثه (اختياري — اتركه فاضي لتحديث كل الأعمال)'
+        required: false
+        type: string
 
 permissions:
   contents: write
@@ -22,12 +27,14 @@ jobs:
           node-version: 20
 
       - name: Run update script
+        env:
+          ONLY_ID: ${{ inputs.id }}
         run: node scripts/update.mjs
 
-      - name: Commit catalog if changed
+      - name: Commit catalog/userdata if changed
         run: |
           git config user.name "watchlist-bot"
           git config user.email "actions@users.noreply.github.com"
-          git add data/catalog.json
+          git add data/catalog.json data/userdata.json
           git diff --cached --quiet || git commit -m "تحديث تلقائي: $(date -u +'%Y-%m-%d %H:%M UTC')"
           git push

@@ -8,32 +8,15 @@
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@500;700;800&family=Tajawal:wght@400;500;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
 <style>
   :root{
-    --bg:#14151A;
-    --surface:#1C1E25;
-    --surface2:#252832;
-    --line: rgba(255,255,255,.09);
-    --text:#F2F0E9;
-    --muted:#92959f;
-    --muted2:#5d6070;
-    --series:#E3B23C;
-    --movie:#36C2B4;
-    --anime:#E2683B;
-    --play:#8C7AE6;
-    --story:#D6608A;
-    --game:#6FBF73;
-    --danger:#D85C5C;
-    --good:#5FB87A;
-    --radius:14px;
+    --bg:#14151A; --surface:#1C1E25; --surface2:#252832; --line: rgba(255,255,255,.09);
+    --text:#F2F0E9; --muted:#92959f; --muted2:#5d6070;
+    --series:#E3B23C; --movie:#36C2B4; --anime:#E2683B; --play:#8C7AE6;
+    --story:#D6608A; --game:#6FBF73; --cartoon:#4FA8E0;
+    --danger:#D85C5C; --good:#5FB87A; --radius:14px;
   }
   *{box-sizing:border-box;}
   html,body{margin:0;padding:0;}
-  body{
-    background:var(--bg);
-    color:var(--text);
-    font-family:'Tajawal',sans-serif;
-    min-height:100vh;
-    -webkit-font-smoothing:antialiased;
-  }
+  body{background:var(--bg);color:var(--text);font-family:'Tajawal',sans-serif;min-height:100vh;-webkit-font-smoothing:antialiased;}
   h1,h2,h3,.display{font-family:'Cairo',sans-serif;}
   .mono{font-family:'JetBrains Mono',monospace;}
   button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit;}
@@ -41,36 +24,19 @@
   ::-webkit-scrollbar{width:8px;height:8px;}
   ::-webkit-scrollbar-thumb{background:var(--surface2);border-radius:8px;}
 
-  #compatBanner{
-    display:none;position:fixed;top:0;left:0;right:0;z-index:80;
-    background:#3a2230;border-bottom:1px solid var(--danger);color:#f4d6d6;
-    font-size:13px;padding:10px 16px;text-align:center;
-  }
+  #compatBanner{display:none;position:fixed;top:0;left:0;right:0;z-index:80;background:#3a2230;border-bottom:1px solid var(--danger);color:#f4d6d6;font-size:13px;padding:10px 16px;text-align:center;}
   #compatBanner a{color:var(--series);font-weight:700;text-decoration:underline;}
 
-  /* ===== layout ===== */
   #app{display:flex;min-height:100vh;}
-
-  .sidebar{
-    width:240px;flex:none;
-    background:var(--surface);
-    border-left:1px solid var(--line);
-    padding:22px 16px;
-    display:flex;flex-direction:column;gap:18px;
-    position:sticky;top:0;height:100vh;overflow-y:auto;
-  }
+  .sidebar{width:240px;flex:none;background:var(--surface);border-left:1px solid var(--line);padding:22px 16px;display:flex;flex-direction:column;gap:18px;position:sticky;top:0;height:100vh;overflow-y:auto;}
   .brand{display:flex;align-items:center;gap:10px;padding:0 4px;}
   .brand-mark{width:30px;height:30px;flex:none;}
   .brand h1{font-size:19px;margin:0;font-weight:800;letter-spacing:.2px;}
-  .brand span{display:block;font-size:11px;color:var(--muted2);font-family:'Tajawal';font-weight:400;margin-top:1px;}
+  .brand span{display:block;font-size:11px;color:var(--muted2);font-weight:400;margin-top:1px;}
 
   .nav{display:flex;flex-direction:column;gap:4px;}
-  .nav button{
-    display:flex;align-items:center;gap:10px;
-    padding:9px 12px;border-radius:10px;
-    font-size:14px;font-weight:500;color:var(--muted);
-    text-align:right;transition:.15s;
-  }
+  .nav-divider{height:1px;background:var(--line);margin:4px 2px 8px;}
+  .nav button{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:10px;font-size:14px;font-weight:500;color:var(--muted);text-align:right;transition:.15s;}
   .nav button .dot{width:8px;height:8px;border-radius:50%;background:var(--muted2);flex:none;}
   .nav button:hover{background:var(--surface2);color:var(--text);}
   .nav button.active{background:var(--surface2);color:var(--text);}
@@ -78,29 +44,20 @@
   .nav button .count{margin-right:auto;font-family:'JetBrains Mono';font-size:11.5px;color:var(--muted2);}
 
   .sidebar-bottom{margin-top:auto;display:flex;flex-direction:column;gap:8px;}
-  .check-status{
-    font-size:11.5px;color:var(--muted2);padding:10px 12px;
-    background:var(--surface2);border-radius:10px;line-height:1.7;
-  }
+  .check-status{font-size:11.5px;color:var(--muted2);padding:10px 12px;background:var(--surface2);border-radius:10px;line-height:1.7;}
   .check-status b{color:var(--muted);font-weight:600;}
   .check-status .repo-link{color:var(--series);cursor:pointer;font-weight:600;}
-  .ghost-btn{
-    font-size:13px;color:var(--muted2);padding:8px 12px;border-radius:10px;
-    border:1px dashed var(--line);text-align:center;transition:.15s;width:100%;
-  }
+  .ghost-btn{font-size:13px;color:var(--muted2);padding:8px 12px;border-radius:10px;border:1px dashed var(--line);text-align:center;transition:.15s;width:100%;}
   .ghost-btn:hover{color:var(--text);border-color:var(--muted2);}
   .ghost-btn.danger:hover{color:var(--danger);border-color:var(--danger);}
+  .ghost-btn.warn{border-color:var(--series);color:var(--series);}
 
   .main{flex:1;min-width:0;padding:24px 32px 60px;}
-  .topbar{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:22px;gap:16px;flex-wrap:wrap;}
+  .topbar{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:14px;gap:16px;flex-wrap:wrap;}
   .topbar h2{font-size:24px;margin:0 0 4px;font-weight:800;}
   .topbar p{margin:0;color:var(--muted2);font-size:13px;}
   .actions{display:flex;gap:10px;}
-  .btn{
-    display:flex;align-items:center;gap:8px;
-    padding:10px 16px;border-radius:10px;font-size:14px;font-weight:700;
-    transition:.15s;
-  }
+  .btn{display:flex;align-items:center;gap:8px;padding:10px 16px;border-radius:10px;font-size:14px;font-weight:700;transition:.15s;}
   .btn-primary{background:var(--series);color:#1a1305;}
   .btn-primary:hover{filter:brightness(1.08);}
   .btn-secondary{background:var(--surface2);color:var(--text);border:1px solid var(--line);}
@@ -109,85 +66,46 @@
   .spin{display:inline-block;width:13px;height:13px;border-radius:50%;border:2px solid currentColor;border-left-color:transparent;animation:spin .7s linear infinite;}
   @keyframes spin{to{transform:rotate(360deg);}}
 
-  /* ===== grid & ticket cards ===== */
-  .grid{
-    display:grid;grid-template-columns:repeat(auto-fill,minmax(168px,1fr));
-    gap:18px;
-  }
-  .card{
-    background:var(--surface);border-radius:var(--radius);overflow:hidden;
-    position:relative;transition:transform .15s, box-shadow .15s;
-    border:1px solid var(--line);
-  }
+  .coll-chips{display:none;gap:8px;margin-bottom:18px;flex-wrap:wrap;}
+  .coll-chip{padding:6px 14px;border-radius:20px;font-size:12.5px;background:var(--surface2);border:1px solid var(--line);color:var(--muted);}
+  .coll-chip.sel{background:var(--movie);color:#0d2826;border-color:transparent;}
+
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(168px,1fr));gap:18px;}
+  .card{background:var(--surface);border-radius:var(--radius);overflow:hidden;position:relative;transition:transform .15s, box-shadow .15s;border:1px solid var(--line);}
   .card:hover{transform:translateY(-4px);box-shadow:0 12px 24px -10px rgba(0,0,0,.6);}
-  .poster{
-    aspect-ratio:2/3;background:var(--surface2) center/cover no-repeat;
-    position:relative;display:flex;align-items:center;justify-content:center;
-  }
+  .poster{aspect-ratio:2/3;background:var(--surface2) center/cover no-repeat;position:relative;display:flex;align-items:center;justify-content:center;}
   .poster.no-img::after{content:'🎬';font-size:30px;opacity:.35;}
-  .type-chip{
-    position:absolute;top:8px;right:8px;font-size:10.5px;font-weight:700;
-    padding:3px 8px;border-radius:20px;color:#10110f;z-index:2;
-  }
-  .news-dot{
-    position:absolute;top:8px;left:8px;width:9px;height:9px;border-radius:50%;
-    background:var(--anime);box-shadow:0 0 0 3px rgba(226,104,59,.25);z-index:2;
-  }
-  .status-badge-onposter{
-    position:absolute;bottom:7px;left:7px;font-size:10px;font-weight:700;
-    padding:2px 8px;border-radius:20px;z-index:2;backdrop-filter:blur(2px);
-  }
+  .type-chip{position:absolute;top:8px;right:8px;font-size:10.5px;font-weight:700;padding:3px 8px;border-radius:20px;color:#10110f;z-index:2;}
+  .news-dot{position:absolute;top:8px;left:8px;width:9px;height:9px;border-radius:50%;background:var(--anime);box-shadow:0 0 0 3px rgba(226,104,59,.25);z-index:2;}
+  .status-badge-onposter{position:absolute;bottom:7px;left:7px;font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;z-index:2;backdrop-filter:blur(2px);}
   .quick-actions{position:absolute;bottom:7px;right:7px;display:flex;gap:5px;z-index:2;}
-  .qa-btn{
-    width:25px;height:25px;border-radius:50%;background:rgba(10,11,14,.78);
-    border:1px solid var(--line);color:var(--muted);font-size:12.5px;
-    display:flex;align-items:center;justify-content:center;backdrop-filter:blur(2px);
-    line-height:1;
-  }
+  .qa-btn{width:25px;height:25px;border-radius:50%;background:rgba(10,11,14,.78);border:1px solid var(--line);color:var(--muted);font-size:12.5px;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(2px);line-height:1;}
   .qa-btn:hover{background:rgba(10,11,14,.92);color:var(--text);}
   .qa-btn.qa-active{border-color:transparent;}
   .qa-btn.qa-active[data-qa="completed"]{background:var(--good);color:#0d130f;}
   .qa-btn.qa-active[data-qa="dropped"]{background:var(--danger);color:#fff;}
-  .perf{
-    height:1px;position:relative;
-    background:repeating-linear-gradient(to left,var(--line) 0 6px,transparent 6px 12px);
-    margin:0 10px;
-  }
-  .perf::before,.perf::after{
-    content:'';position:absolute;top:-7px;width:14px;height:14px;border-radius:50%;
-    background:var(--bg);
-  }
+  .perf{height:1px;position:relative;background:repeating-linear-gradient(to left,var(--line) 0 6px,transparent 6px 12px);margin:0 10px;}
+  .perf::before,.perf::after{content:'';position:absolute;top:-7px;width:14px;height:14px;border-radius:50%;background:var(--bg);}
   .perf::before{right:-17px;} .perf::after{left:-17px;}
   .stub{padding:10px 12px 12px;}
-  .stub .title{font-size:13.5px;font-weight:700;line-height:1.35;
-    display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;min-height:35px;}
+  .stub .title{font-size:13.5px;font-weight:700;line-height:1.35;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;min-height:35px;}
   .stub .meta-row{display:flex;justify-content:space-between;align-items:center;margin-top:6px;}
   .stub .year{font-size:11px;color:var(--muted2);font-family:'JetBrains Mono';}
   .wstatus{font-size:10px;padding:2px 7px;border-radius:20px;background:var(--surface2);color:var(--muted);}
-  .progress-bar{height:4px;border-radius:4px;background:var(--surface2);margin-top:8px;overflow:hidden;}
+  .season-line{font-size:10.5px;color:var(--muted2);font-family:'JetBrains Mono';margin-top:5px;}
+  .coll-line{font-size:10px;color:var(--movie);margin-top:3px;font-weight:600;}
+  .progress-bar{height:4px;border-radius:4px;background:var(--surface2);margin-top:6px;overflow:hidden;}
   .progress-bar > div{height:100%;border-radius:4px;}
 
-  .empty{
-    grid-column:1/-1;text-align:center;padding:70px 20px;color:var(--muted2);
-  }
+  .empty{grid-column:1/-1;text-align:center;padding:70px 20px;color:var(--muted2);}
   .empty .big{font-size:32px;margin-bottom:10px;}
   .empty p{margin:4px 0;font-size:14px;}
 
-  /* ===== modal ===== */
-  .overlay{
-    position:fixed;inset:0;background:rgba(8,9,12,.72);backdrop-filter:blur(3px);
-    display:flex;align-items:center;justify-content:center;z-index:50;padding:20px;
-    opacity:0;pointer-events:none;transition:.15s;
-  }
+  .overlay{position:fixed;inset:0;background:rgba(8,9,12,.72);backdrop-filter:blur(3px);display:flex;align-items:center;justify-content:center;z-index:50;padding:20px;opacity:0;pointer-events:none;transition:.15s;}
   .overlay.show{opacity:1;pointer-events:auto;}
-  .modal{
-    background:var(--surface);border-radius:18px;max-width:560px;width:100%;
-    max-height:88vh;overflow-y:auto;border:1px solid var(--line);
-    transform:translateY(8px);transition:.15s;
-  }
+  .modal{background:var(--surface);border-radius:18px;max-width:580px;width:100%;max-height:88vh;overflow-y:auto;border:1px solid var(--line);transform:translateY(8px);transition:.15s;}
   .overlay.show .modal{transform:translateY(0);}
-  .modal-head{display:flex;align-items:center;justify-content:space-between;
-    padding:18px 20px;border-bottom:1px solid var(--line);position:sticky;top:0;background:var(--surface);z-index:2;}
+  .modal-head{display:flex;align-items:center;justify-content:space-between;padding:18px 20px;border-bottom:1px solid var(--line);position:sticky;top:0;background:var(--surface);z-index:2;}
   .modal-head h3{margin:0;font-size:17px;}
   .modal-body{padding:20px;}
   .x-btn{font-size:18px;color:var(--muted);padding:4px;border-radius:8px;}
@@ -195,24 +113,17 @@
 
   .field{margin-bottom:14px;}
   .field label{display:block;font-size:12.5px;color:var(--muted);margin-bottom:6px;font-weight:600;}
-  .field input[type=text],.field input[type=password],.field textarea,.field select{
-    width:100%;background:var(--surface2);border:1px solid var(--line);color:var(--text);
-    padding:10px 12px;border-radius:10px;font-size:14px;font-family:inherit;
-  }
+  .field input[type=text],.field input[type=password],.field textarea,.field select{width:100%;background:var(--surface2);border:1px solid var(--line);color:var(--text);padding:10px 12px;border-radius:10px;font-size:14px;font-family:inherit;}
   .field textarea{resize:vertical;min-height:60px;}
   .hint{font-size:12px;color:var(--muted2);line-height:1.6;margin:0 0 14px;}
   .hint a{color:var(--series);text-decoration:underline;}
   .type-pick{display:flex;gap:8px;flex-wrap:wrap;}
-  .type-pick button{
-    padding:8px 14px;border-radius:10px;font-size:13px;font-weight:600;
-    background:var(--surface2);border:1px solid var(--line);color:var(--muted);
-  }
+  .type-pick button{padding:8px 14px;border-radius:10px;font-size:13px;font-weight:600;background:var(--surface2);border:1px solid var(--line);color:var(--muted);}
   .type-pick button.sel{color:#10110f;border-color:transparent;}
   details.adv{margin:6px 0 14px;}
   details.adv summary{font-size:12.5px;color:var(--muted2);cursor:pointer;}
   details.adv > div{margin-top:10px;}
 
-  /* detail modal */
   .detail-top{display:flex;gap:16px;padding:20px;}
   .detail-poster{width:110px;flex:none;aspect-ratio:2/3;border-radius:10px;background:var(--surface2) center/cover no-repeat;}
   .detail-info h3{margin:0 0 4px;font-size:18px;}
@@ -220,8 +131,8 @@
   .detail-info p{font-size:13.5px;color:var(--muted);line-height:1.6;margin:0;}
   .status-pill{display:inline-block;font-size:11px;padding:3px 9px;border-radius:20px;margin-top:8px;}
 
-  .tabs{display:flex;gap:4px;padding:0 20px;border-bottom:1px solid var(--line);}
-  .tabs button{padding:10px 14px;font-size:13.5px;font-weight:600;color:var(--muted2);border-bottom:2px solid transparent;}
+  .tabs{display:flex;gap:4px;padding:0 20px;border-bottom:1px solid var(--line);overflow-x:auto;}
+  .tabs button{padding:10px 14px;font-size:13.5px;font-weight:600;color:var(--muted2);border-bottom:2px solid transparent;white-space:nowrap;}
   .tabs button.active{color:var(--text);border-color:var(--series);}
   .tab-panel{padding:18px 20px;}
   .tab-panel.hidden{display:none;}
@@ -242,35 +153,37 @@
   .news-item .d{font-size:11px;color:var(--muted2);font-family:'JetBrains Mono';margin-bottom:3px;}
   .news-item .s{font-size:13px;line-height:1.55;color:var(--text);}
   .news-item .src{font-size:11px;color:var(--muted2);margin-top:4px;}
+  .news-item:hover{background:#2e313c;}
   .news-empty{font-size:12.5px;color:var(--muted2);background:none;padding:4px 0 12px;}
   .news-foot{display:flex;justify-content:space-between;align-items:center;margin-top:4px;font-size:11.5px;color:var(--muted2);gap:10px;flex-wrap:wrap;}
+
+  .match-result{display:flex;gap:10px;align-items:center;padding:8px;border-radius:10px;background:var(--surface2);margin-bottom:6px;cursor:pointer;}
+  .match-result:hover{background:#2e313c;}
+  .match-result img{width:34px;height:48px;object-fit:cover;border-radius:6px;background:#000;flex:none;}
+  .match-result .ph{width:34px;height:48px;border-radius:6px;background:var(--surface);flex:none;}
+  .match-result .mr-info{flex:1;font-size:12.5px;color:var(--muted);}
+  .match-result .mr-info b{display:block;font-size:13px;color:var(--text);}
 
   .danger-link{color:var(--danger);font-size:13px;font-weight:600;}
   .danger-link:hover{text-decoration:underline;}
   .plain-link{color:var(--series);font-size:13px;font-weight:600;}
   .plain-link:hover{text-decoration:underline;}
 
-  /* toast */
   #toasts{position:fixed;bottom:20px;left:20px;z-index:100;display:flex;flex-direction:column;gap:8px;}
-  .toast{
-    background:var(--surface2);border:1px solid var(--line);color:var(--text);
-    padding:11px 16px;border-radius:10px;font-size:13.5px;box-shadow:0 8px 20px -8px rgba(0,0,0,.5);
-    animation:in .2s ease;max-width:340px;
-  }
+  .toast{background:var(--surface2);border:1px solid var(--line);color:var(--text);padding:11px 16px;border-radius:10px;font-size:13.5px;box-shadow:0 8px 20px -8px rgba(0,0,0,.5);animation:in .2s ease;max-width:340px;}
   .toast.error{border-color:var(--danger);}
   .toast.success{border-color:var(--good);}
   @keyframes in{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
 
-  /* confirm modal */
   .confirm-box{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:20px;max-width:340px;}
   .confirm-box p{font-size:14px;color:var(--muted);line-height:1.6;margin:0 0 16px;}
   .confirm-actions{display:flex;gap:8px;justify-content:flex-end;}
 
   @media (max-width:720px){
-    .sidebar{position:fixed;bottom:0;top:auto;width:100%;height:auto;flex-direction:row;
-      border-left:none;border-top:1px solid var(--line);padding:10px;overflow-x:auto;z-index:20;}
+    .sidebar{position:fixed;bottom:0;top:auto;width:100%;height:auto;flex-direction:row;border-left:none;border-top:1px solid var(--line);padding:10px;overflow-x:auto;z-index:20;}
     .brand,.sidebar-bottom{display:none;}
     .nav{flex-direction:row;}
+    .nav-divider{display:none;}
     .nav button .count{display:none;}
     .main{padding:18px 14px 90px;}
     .detail-top{flex-direction:column;}
@@ -295,11 +208,12 @@
     </div>
     <nav class="nav" id="nav"></nav>
     <div class="sidebar-bottom">
+      <button class="ghost-btn warn" id="unlockBtnSidebar" style="display:none;">🔒 فتح بياناتي</button>
       <div class="check-status" id="checkStatus">—</div>
       <button class="ghost-btn" id="exportBtn">⬇ تصدير بياناتي</button>
       <button class="ghost-btn" id="importBtn">⬆ استيراد بياناتي</button>
       <input type="file" id="importFile" accept="application/json" style="display:none">
-      <button class="ghost-btn danger" id="resetBtn">تصفير بياناتي المحلية</button>
+      <button class="ghost-btn danger" id="resetBtn">تصفير بياناتي</button>
     </div>
   </aside>
 
@@ -314,6 +228,7 @@
         <button class="btn btn-primary" id="addBtn">＋ إضافة عمل</button>
       </div>
     </div>
+    <div class="coll-chips" id="collectionChips"></div>
     <div class="grid" id="grid"></div>
   </main>
 </div>
@@ -326,37 +241,144 @@
 
 <script>
 /* ===================== CONFIG ===================== */
-const TYPE_LABELS = {series:'مسلسل', movie:'فيلم', anime:'أنمي', play:'مسرحية', story:'قصة', game:'لعبة'};
-const TYPE_COLORS = {series:'var(--series)', movie:'var(--movie)', anime:'var(--anime)', play:'var(--play)', story:'var(--story)', game:'var(--game)'};
-const AUTO_FETCH_TYPES = new Set(['series','movie','anime']);
+const TYPE_LABELS = {series:'مسلسل', movie:'فيلم', anime:'أنمي', cartoon:'كرتون', play:'مسرحية', story:'قصة', game:'لعبة'};
+const TYPE_COLORS = {series:'var(--series)', movie:'var(--movie)', anime:'var(--anime)', cartoon:'var(--cartoon)', play:'var(--play)', story:'var(--story)', game:'var(--game)'};
+const AUTO_FETCH_TYPES = new Set(['series','movie','anime','cartoon']);
+const SEASON_TYPES = new Set(['series','anime','cartoon']);
 const STATUS_LABELS = {ongoing:'مستمر', completed:'مكتمل', unclear:'غير منتهي', cancelled:'تكنسل'};
 const STATUS_COLORS = {ongoing:'var(--good)', completed:'var(--movie)', unclear:'var(--series)', cancelled:'var(--danger)'};
-const WATCH_LABELS = {planning:'مخطط له', watching:'أتابعه الآن', completed:'مكتمل', onhold:'متوقف مؤقتًا', dropped:'سحبت عليه'};
+const WATCH_LABELS = {planning:'مخطط له', watching:'أتابعه الآن', completed:'مكتمل', incomplete:'غير مكتمل', onhold:'متوقف مؤقتًا', dropped:'سحبت عليه'};
 const NEWS_LABELS = {season_news:'مواسم جديدة / إلغاء', release_news:'مواعيد العرض والتأجيل', general_news:'أخبار عامة'};
 const NEWS_COLORS = {season_news:'var(--anime)', release_news:'var(--movie)', general_news:'var(--play)'};
-const LOCAL_KEY = 'watchlist_local_v1';
+const REL_LABELS = {Sequel:'تتمة', Prequel:'الجزء السابق', 'Side story':'قصة جانبية', 'Spin-off':'سلسلة فرعية', 'Alternative version':'نسخة بديلة', 'Full story':'القصة الكاملة'};
+const SETTINGS_KEY = 'watchlist_settings_v1';
+const CACHE_KEY = 'watchlist_userdata_cache_v1';
+const PASSPHRASE_SESSION_KEY = 'watchlist_passphrase_v1';
 
 let CATALOG = { updatedAt: null, items: [] };
 let LOCAL = { progress:{}, overrides:{}, hidden:{}, settings:{ repo:'', token:'' } };
 let activeSection = 'all';
+let activeCollection = null;
 let activeDetailId = null;
 let activeDetailTab = 'overview';
 let catalogLoadFailed = false;
+let PASSPHRASE = null;
+let ENCRYPTION_ACTIVE = false;
+let NEEDS_UNLOCK = false;
+let RAW_ENCRYPTED_PAYLOAD = null;
 
-/* ===================== LOCAL STORAGE ===================== */
-function loadLocal(){
+/* ===================== SETTINGS (device-local: repo + token) ===================== */
+function loadSettings(){
   try{
-    const raw = localStorage.getItem(LOCAL_KEY);
-    if(raw){
-      const parsed = JSON.parse(raw);
-      LOCAL = Object.assign({progress:{},overrides:{},hidden:{},settings:{repo:'',token:''}}, parsed);
-      LOCAL.settings = Object.assign({repo:'',token:''}, LOCAL.settings);
-    }
+    const raw = localStorage.getItem(SETTINGS_KEY);
+    if(raw) LOCAL.settings = Object.assign({repo:'',token:''}, JSON.parse(raw));
   }catch(e){ console.error(e); }
 }
-function saveLocal(){
-  try{ localStorage.setItem(LOCAL_KEY, JSON.stringify(LOCAL)); }
-  catch(e){ showToast('تعذّر حفظ بياناتك محليًا في هذا المتصفح', 'error'); }
+function saveSettings(){
+  try{ localStorage.setItem(SETTINGS_KEY, JSON.stringify(LOCAL.settings)); }catch(e){ console.error(e); }
+}
+
+/* ===================== ENCRYPTION (Web Crypto, AES-GCM + PBKDF2) ===================== */
+function b64FromBytes(bytes){ return btoa(String.fromCharCode(...new Uint8Array(bytes))); }
+function bytesFromB64(b64){ return Uint8Array.from(atob(b64), c=>c.charCodeAt(0)); }
+async function deriveKey(passphrase, saltB64){
+  const salt = bytesFromB64(saltB64);
+  const keyMaterial = await crypto.subtle.importKey('raw', new TextEncoder().encode(passphrase), {name:'PBKDF2'}, false, ['deriveKey']);
+  return crypto.subtle.deriveKey({name:'PBKDF2', salt, iterations:150000, hash:'SHA-256'}, keyMaterial, {name:'AES-GCM', length:256}, false, ['encrypt','decrypt']);
+}
+async function encryptUserData(passphrase, dataObj){
+  const saltB64 = b64FromBytes(crypto.getRandomValues(new Uint8Array(16)));
+  const key = await deriveKey(passphrase, saltB64);
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+  const plaintext = new TextEncoder().encode(JSON.stringify(dataObj));
+  const ciphertextBuf = await crypto.subtle.encrypt({name:'AES-GCM', iv}, key, plaintext);
+  return { encrypted:true, salt:saltB64, iv:b64FromBytes(iv), ciphertext:b64FromBytes(ciphertextBuf) };
+}
+async function decryptUserData(passphrase, payload){
+  const key = await deriveKey(passphrase, payload.salt);
+  const iv = bytesFromB64(payload.iv);
+  const ciphertext = bytesFromB64(payload.ciphertext);
+  const plainBuf = await crypto.subtle.decrypt({name:'AES-GCM', iv}, key, ciphertext);
+  return JSON.parse(new TextDecoder().decode(plainBuf));
+}
+async function tryUnlock(promptedPassphrase){
+  const p = promptedPassphrase || prompt('🔒 أدخل كلمة مرور بياناتك:');
+  if(!p) return false;
+  try{
+    const d = await decryptUserData(p, RAW_ENCRYPTED_PAYLOAD);
+    LOCAL.progress = d.progress||{}; LOCAL.overrides = d.overrides||{}; LOCAL.hidden = d.hidden||{};
+    PASSPHRASE = p; ENCRYPTION_ACTIVE = true; NEEDS_UNLOCK = false;
+    try{ sessionStorage.setItem(PASSPHRASE_SESSION_KEY, p); }catch(e){}
+    cacheUserDataLocally();
+    renderAll();
+    showToast('تم الفتح', 'success');
+    return true;
+  }catch(e){
+    showToast('كلمة مرور خاطئة', 'error');
+    return false;
+  }
+}
+document.getElementById('unlockBtnSidebar').addEventListener('click', ()=> tryUnlock());
+
+/* ===================== USER DATA (progress/overrides/hidden — synced to repo) ===================== */
+async function loadUserData(){
+  try{
+    const res = await fetch('./data/userdata.json', {cache:'no-store'});
+    if(res.ok){
+      const raw = await res.json();
+      if(raw && raw.encrypted){
+        RAW_ENCRYPTED_PAYLOAD = raw;
+        let cached = null;
+        try{ cached = sessionStorage.getItem(PASSPHRASE_SESSION_KEY); }catch(e){}
+        if(cached){
+          try{
+            const d = await decryptUserData(cached, raw);
+            LOCAL.progress=d.progress||{}; LOCAL.overrides=d.overrides||{}; LOCAL.hidden=d.hidden||{};
+            PASSPHRASE = cached; ENCRYPTION_ACTIVE = true;
+            cacheUserDataLocally();
+            return;
+          }catch(e){ /* stale cached passphrase, fall through */ }
+        }
+        ENCRYPTION_ACTIVE = true;
+        NEEDS_UNLOCK = true;
+        return;
+      }
+      LOCAL.progress = raw.progress||{}; LOCAL.overrides = raw.overrides||{}; LOCAL.hidden = raw.hidden||{};
+      cacheUserDataLocally();
+      return;
+    }
+  }catch(e){ console.error('userdata load failed', e); }
+  try{
+    const raw = localStorage.getItem(CACHE_KEY);
+    if(raw){ const d = JSON.parse(raw); LOCAL.progress=d.progress||{}; LOCAL.overrides=d.overrides||{}; LOCAL.hidden=d.hidden||{}; }
+  }catch(e){}
+}
+function cacheUserDataLocally(){
+  try{ localStorage.setItem(CACHE_KEY, JSON.stringify({progress:LOCAL.progress, overrides:LOCAL.overrides, hidden:LOCAL.hidden})); }catch(e){}
+}
+async function syncUserDataToRepo(){
+  try{
+    const path = `/repos/${LOCAL.settings.repo}/contents/data/userdata.json`;
+    const getRes = await githubApi(path);
+    let sha;
+    if(getRes.ok){ const d = await getRes.json(); sha = d.sha; }
+    const payloadObj = {progress:LOCAL.progress, overrides:LOCAL.overrides, hidden:LOCAL.hidden};
+    const finalPayload = PASSPHRASE ? await encryptUserData(PASSPHRASE, payloadObj) : payloadObj;
+    const body = {message:'تحديث بياناتي', content: utf8ToBase64(JSON.stringify(finalPayload,null,2)+'\n'), branch:'main'};
+    if(sha) body.sha = sha;
+    const putRes = await githubApi(path, {method:'PUT', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body)});
+    return putRes.ok;
+  }catch(e){ console.error(e); return false; }
+}
+async function persistUserData(){
+  cacheUserDataLocally();
+  if(tokenSet() && repoSet()){
+    const ok = await syncUserDataToRepo();
+    if(!ok) showToast('تعذّر الحفظ بالمستودع، حاول مرة ثانية', 'error');
+    return ok;
+  }
+  showToast('بدون توكن، يُحفظ بمتصفحك مؤقتًا فقط', 'error');
+  return false;
 }
 
 /* ===================== CATALOG (read-only, from GitHub) ===================== */
@@ -401,13 +423,67 @@ function editTitlesLink(){ return `https://github.com/${LOCAL.settings.repo}/edi
 
 function utf8ToBase64(str){ return btoa(unescape(encodeURIComponent(str))); }
 function base64ToUtf8(str){ return decodeURIComponent(escape(atob(str))); }
+async function githubApi(path, options){
+  return fetch(`https://api.github.com${path}`, Object.assign({
+    headers: Object.assign({ 'Authorization': `Bearer ${LOCAL.settings.token}`, 'Accept': 'application/vnd.github+json' }, (options && options.headers) || {})
+  }, options || {}));
+}
+async function updateTitleEntry(itemId, patch, commitMsg){
+  const path = `/repos/${LOCAL.settings.repo}/contents/data/titles.json`;
+  const getRes = await githubApi(path);
+  if(!getRes.ok) throw new Error('تعذّر القراءة من GitHub (status '+getRes.status+')');
+  const getData = await getRes.json();
+  const arr = JSON.parse(base64ToUtf8(getData.content.replace(/\n/g,'')));
+  const idx = arr.findIndex(x=>x.id===itemId);
+  if(idx===-1) throw new Error('العمل غير موجود في titles.json');
+  Object.assign(arr[idx], patch);
+  const newContent = utf8ToBase64(JSON.stringify(arr,null,2)+'\n');
+  const putRes = await githubApi(path, {method:'PUT', headers:{'Content-Type':'application/json'}, body: JSON.stringify({message:commitMsg, content:newContent, sha:getData.sha, branch:'main'})});
+  if(!putRes.ok) throw new Error('فشل الحفظ بـ GitHub (status '+putRes.status+')');
+  return true;
+}
+async function appendTitleEntry(entry, commitMsg){
+  const path = `/repos/${LOCAL.settings.repo}/contents/data/titles.json`;
+  const getRes = await githubApi(path);
+  if(!getRes.ok) throw new Error('تعذّر القراءة من GitHub (status '+getRes.status+')');
+  const getData = await getRes.json();
+  const arr = JSON.parse(base64ToUtf8(getData.content.replace(/\n/g,'')));
+  arr.push(entry);
+  const newContent = utf8ToBase64(JSON.stringify(arr,null,2)+'\n');
+  const putRes = await githubApi(path, {method:'PUT', headers:{'Content-Type':'application/json'}, body: JSON.stringify({message:commitMsg, content:newContent, sha:getData.sha, branch:'main'})});
+  if(!putRes.ok) throw new Error('فشل الحفظ بـ GitHub (status '+putRes.status+')');
+  return true;
+}
+async function triggerItemRefresh(id){
+  if(!repoSet()){ openSettingsModal(); showToast('اربط مستودعك أولًا', 'error'); return false; }
+  if(tokenSet()){
+    try{
+      const res = await githubApi(`/repos/${LOCAL.settings.repo}/actions/workflows/daily-update.yml/dispatches`, {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ ref:'main', inputs:{ id: id||'' } })
+      });
+      if(res.ok){ showToast('تم تشغيل التحديث — راجع الصفحة بعد دقيقة أو دقيقتين', 'success'); return true; }
+    }catch(e){ /* fall through to deep link */ }
+  }
+  window.open(updateNowLink(), '_blank', 'noopener');
+  return false;
+}
+function slugify(text, type_){
+  let t = (text||'').trim().toLowerCase().replace(/[^\w\u0600-\u06FF]+/g,'-').replace(/^-+|-+$/g,'');
+  if(!t) t = 'item';
+  return `${t}-${type_}`;
+}
 
 function getProgress(id){
   return LOCAL.progress[id] || {watchStatus:'planning', currentSeason:1, currentEpisode:0, watchedEpisodes:0, rating:null, notes:'', updatedAt:null};
 }
 function getOverride(id){ return LOCAL.overrides[id] || {}; }
 function mergedItem(catalogItem){
-  const ov = getOverride(catalogItem.id);
+  const ov = Object.assign({}, getOverride(catalogItem.id));
+  if(ov.status !== undefined && ov._statusBaseline !== undefined && ov._statusBaseline !== catalogItem.status){
+    delete ov.status; // underlying auto-data moved on since this manual fix was set — let it win
+  }
+  delete ov._statusBaseline;
   const merged = Object.assign({}, catalogItem, ov);
   merged.progress = getProgress(catalogItem.id);
   merged.news = catalogItem.news || {season_news:[],release_news:[],general_news:[]};
@@ -415,15 +491,54 @@ function mergedItem(catalogItem){
   return merged;
 }
 function visibleItems(){
-  return (CATALOG.items||[])
-    .filter(i => !LOCAL.hidden[i.id])
-    .map(mergedItem);
+  return (CATALOG.items||[]).filter(i => !LOCAL.hidden[i.id]).map(mergedItem);
 }
 function findRawItem(id){ return (CATALOG.items||[]).find(i=>i.id===id); }
-function slugify(text, type_){
-  let t = (text||'').trim().toLowerCase().replace(/[^\w\u0600-\u06FF]+/g,'-').replace(/^-+|-+$/g,'');
-  if(!t) t = 'item';
-  return `${t}-${type_}`;
+
+/* ===================== SEARCH SOURCES (client-side, for re-matching) ===================== */
+async function searchMatches(query, type){
+  try{
+    if(type==='anime'){
+      const res = await fetch(`https://api.jikan.moe/v4/anime?q=${encodeURIComponent(query)}&limit=6&sfw=true`);
+      if(!res.ok) return [];
+      const data = await res.json();
+      return (data.data||[]).map(a=>({source:'jikan', external_id:a.mal_id, title:a.title, year:(a.aired&&a.aired.from)?a.aired.from.slice(0,4):'', poster:(a.images&&a.images.jpg)?a.images.jpg.image_url:''}));
+    }
+    if(type==='movie'){
+      const res = await fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(query)}&media=movie&limit=6`);
+      if(!res.ok) return [];
+      const data = await res.json();
+      return (data.results||[]).map(r=>({source:'itunes', external_id:r.trackId, title:r.trackName, year:(r.releaseDate||'').slice(0,4), poster:r.artworkUrl100}));
+    }
+    const res = await fetch(`https://api.tvmaze.com/search/shows?q=${encodeURIComponent(query)}`);
+    if(!res.ok) return [];
+    const data = await res.json();
+    return (data||[]).slice(0,6).map(r=>({source:'tvmaze', external_id:r.show.id, title:r.show.name, year:(r.show.premiered||'').slice(0,4), poster:(r.show.image?r.show.image.medium:'')}));
+  }catch(e){ console.error(e); return []; }
+}
+async function pinExternalMatch(itemId, source, externalId, quickPreview){
+  if(!repoSet()||!tokenSet()){ showToast('يحتاج توكن مفعّل بالإعدادات', 'error'); return; }
+  try{
+    await updateTitleEntry(itemId, {external_source:source, external_id:externalId}, `إعادة مطابقة: ${itemId}`);
+    if(quickPreview && quickPreview.poster){
+      LOCAL.overrides[itemId] = Object.assign({}, getOverride(itemId), {poster_url: quickPreview.poster});
+      await persistUserData();
+    }
+    await triggerItemRefresh(itemId);
+    closeOverlay('detailOverlay');
+    showToast('تم التثبيت! بيتحدث خلال دقيقة', 'success');
+  }catch(e){ showToast(e.message||'خطأ غير متوقع', 'error'); }
+}
+async function addSuggestedAnime(malId, name){
+  if(!repoSet()||!tokenSet()){ openSettingsModal(); showToast('يحتاج توكن', 'error'); return; }
+  try{
+    const existing = (CATALOG.items||[]).find(x=>x.external_source==='jikan' && x.external_id===malId);
+    if(existing){ showToast('مضاف عندك أصلًا', 'error'); return; }
+    const id = slugify(name,'anime')+'-'+Date.now().toString(36).slice(-4);
+    await appendTitleEntry({id, title:name, type:'anime', year_hint:'', external_source:'jikan', external_id:malId}, `إضافة مقترح: ${name}`);
+    await triggerItemRefresh(id);
+    showToast(`تمت إضافة "${name}"`, 'success');
+  }catch(e){ showToast(e.message||'خطأ غير متوقع', 'error'); }
 }
 
 /* ===================== NAV / RENDER ===================== */
@@ -431,66 +546,115 @@ function sectionCounts(){
   const all = visibleItems();
   const c = { all: all.length };
   Object.keys(TYPE_LABELS).forEach(t => { c[t] = all.filter(i=>i.type===t).length; });
+  c.news = all.reduce((sum,i)=> sum + i.news.season_news.length + i.news.release_news.length + i.news.general_news.length, 0);
   return c;
 }
 function renderNav(){
   const counts = sectionCounts();
-  const sections = [
-    {key:'all', label:'الكل', color:'var(--series)'},
-    {key:'series', label:'مسلسلات', color:'var(--series)'},
-    {key:'movie', label:'أفلام', color:'var(--movie)'},
-    {key:'anime', label:'أنمي', color:'var(--anime)'},
-    {key:'play', label:'مسرحيات', color:'var(--play)'},
-    {key:'story', label:'قصص', color:'var(--story)'},
-    {key:'game', label:'ألعاب', color:'var(--game)'}
-  ];
+  const typeSections = Object.keys(TYPE_LABELS).map(t=>({key:t, label:{series:'مسلسلات',movie:'أفلام',anime:'أنمي',cartoon:'كرتون',play:'مسرحيات',story:'قصص',game:'ألعاب'}[t], color:TYPE_COLORS[t]}));
   const nav = document.getElementById('nav');
-  nav.innerHTML = sections.map(s=>`
+  const newsBtn = `<button data-sec="news" class="${activeSection==='news'?'active':''}" style="--accent-color:var(--text)">
+      <span class="dot" style="${activeSection==='news'?'background:var(--text)':''}"></span><span>📰 الأخبار</span><span class="count">${counts.news}</span></button>`;
+  const allBtn = `<button data-sec="all" class="${activeSection==='all'?'active':''}" style="--accent-color:var(--series)">
+      <span class="dot" style="${activeSection==='all'?'background:var(--series)':''}"></span><span>الكل</span><span class="count">${counts.all}</span></button>`;
+  const typeBtns = typeSections.map(s=>`
     <button data-sec="${s.key}" class="${activeSection===s.key?'active':''}" style="--accent-color:${s.color}">
-      <span class="dot" style="${activeSection===s.key?`background:${s.color}`:''}"></span>
-      <span>${s.label}</span>
-      <span class="count">${counts[s.key]}</span>
-    </button>`).join('');
+      <span class="dot" style="${activeSection===s.key?`background:${s.color}`:''}"></span><span>${s.label}</span><span class="count">${counts[s.key]}</span></button>`).join('');
+  nav.innerHTML = newsBtn + '<div class="nav-divider"></div>' + allBtn + typeBtns;
   nav.querySelectorAll('button').forEach(b=>b.addEventListener('click', ()=>{
-    activeSection = b.dataset.sec; renderAll();
+    activeSection = b.dataset.sec;
+    if(activeSection !== 'movie') activeCollection = null;
+    renderAll();
   }));
 }
 function renderTopbar(){
-  const titles = {all:'الكل', series:'مسلسلات', movie:'أفلام', anime:'أنمي', play:'مسرحيات', story:'قصص', game:'ألعاب'};
+  const titles = {news:'📰 الأخبار', all:'الكل', series:'مسلسلات', movie:'أفلام', anime:'أنمي', cartoon:'كرتون', play:'مسرحيات', story:'قصص', game:'ألعاب'};
   const subs = {
-    all:'كل ما تتابعه في مكان واحد',
-    series:'تتبّع مواسمك وحلقاتك',
-    movie:'الأفلام التي شاهدتها أو تخطط لها',
-    anime:'متابعة الحلقات والمواسم',
-    play:'المسرحيات والعروض التي تتابعها',
-    story:'القصص التي استمعت لها',
-    game:'الألعاب التي لعبتها'
+    news:'كل التحديثات والأخبار حول أعمالك، مصنّفة', all:'كل ما تتابعه في مكان واحد',
+    series:'تتبّع مواسمك وحلقاتك', movie:'الأفلام التي شاهدتها أو تخطط لها', anime:'متابعة الحلقات والمواسم',
+    cartoon:'الكرتون اللي تتابعه', play:'المسرحيات والعروض التي تتابعها', story:'القصص التي استمعت لها', game:'الألعاب التي لعبتها'
   };
   document.getElementById('sectionTitle').textContent = titles[activeSection];
-  document.getElementById('sectionSub').textContent = subs[activeSection];
+  let sub = subs[activeSection] || '';
+  if(activeSection==='movie' && activeCollection){
+    const inCol = visibleItems().filter(i=>i.type==='movie' && i.collection===activeCollection);
+    const watched = inCol.filter(i=>i.progress.watchStatus==='completed').length;
+    const dropped = inCol.filter(i=>i.progress.watchStatus==='dropped').length;
+    sub = `مجموعة «${activeCollection}» — شاهدت ${watched} من ${inCol.length}${dropped?` — تجاهلت ${dropped}`:''}`;
+  }
+  document.getElementById('sectionSub').textContent = sub;
+}
+function renderCollectionChips(){
+  const wrap = document.getElementById('collectionChips');
+  if(activeSection !== 'movie'){ wrap.style.display='none'; return; }
+  const movies = visibleItems().filter(i=>i.type==='movie');
+  const cols = {};
+  movies.forEach(m=>{ if(m.collection){ cols[m.collection] = (cols[m.collection]||0)+1; } });
+  const names = Object.keys(cols).sort();
+  if(names.length===0){ wrap.style.display='none'; return; }
+  wrap.style.display='flex';
+  wrap.innerHTML = `<button class="coll-chip ${!activeCollection?'sel':''}" data-c="">الكل</button>` +
+    names.map(n=>`<button class="coll-chip ${activeCollection===n?'sel':''}" data-c="${escapeHtml(n)}">${escapeHtml(n)} (${cols[n]})</button>`).join('');
+  wrap.querySelectorAll('.coll-chip').forEach(b=>b.addEventListener('click', ()=>{ activeCollection = b.dataset.c || null; renderAll(); }));
 }
 function renderCheckStatus(){
   const el = document.getElementById('checkStatus');
   const repoText = repoSet() ? `<span class="repo-link" id="repoLinkBtn">${escapeHtml(LOCAL.settings.repo)}</span>` : `<span class="repo-link" id="repoLinkBtn">غير محدد — اضغط للربط</span>`;
-  const tokenText = tokenSet() ? '<span style="color:var(--good)">مفعّلة ✓</span>' : '<span style="color:var(--muted2)">غير مفعّلة</span>';
-  el.innerHTML = `<b>آخر تحديث من GitHub:</b><br>${timeAgo(CATALOG.updatedAt)}<br><br><b>المستودع:</b><br>${repoText}<br><br><b>الإضافة المباشرة:</b><br>${tokenText}`;
+  let storageText;
+  if(NEEDS_UNLOCK) storageText = '<span style="color:var(--series)">مشفّرة — تحتاج فتح 🔒</span>';
+  else if(tokenSet()) storageText = ENCRYPTION_ACTIVE ? '<span style="color:var(--good)">متزامنة ومشفّرة ✓🔒</span>' : '<span style="color:var(--good)">متزامنة مع المستودع ✓</span>';
+  else storageText = '<span style="color:var(--danger)">محلي مؤقت فقط (بدون توكن)</span>';
+  el.innerHTML = `<b>آخر تحديث من GitHub:</b><br>${timeAgo(CATALOG.updatedAt)}<br><br><b>المستودع:</b><br>${repoText}<br><br><b>حفظ بياناتك:</b><br>${storageText}`;
   const btn = document.getElementById('repoLinkBtn');
   if(btn) btn.addEventListener('click', openSettingsModal);
+  document.getElementById('unlockBtnSidebar').style.display = NEEDS_UNLOCK ? 'block' : 'none';
 }
 function progressFraction(item){
   const p = item.progress;
-  if(item.type==='movie' || item.type==='play' || item.type==='story' || item.type==='game') return p.watchStatus==='completed' ? 1 : 0;
+  if(!SEASON_TYPES.has(item.type)) return p.watchStatus==='completed' ? 1 : 0;
   const total = item.total_episodes || (item.total_seasons ? item.total_seasons*12 : null);
-  if(!total) return p.watchStatus==='completed' ? 1 : 0;
+  if(!total) return (p.watchStatus==='completed') ? 1 : 0;
   return Math.max(0, Math.min(1, (p.watchedEpisodes||0)/total));
+}
+function renderNewsFeed(){
+  const grid = document.getElementById('grid');
+  const items = visibleItems();
+  const buckets = {season_news:[], release_news:[], general_news:[]};
+  items.forEach(it=>{
+    Object.keys(NEWS_LABELS).forEach(cat=>{
+      (it.news[cat]||[]).forEach(n=> buckets[cat].push(Object.assign({}, n, {itemId: it.id, itemTitle: it.title, itemType: it.type})));
+    });
+  });
+  Object.keys(buckets).forEach(cat=> buckets[cat].sort((a,b)=> (b.date||'').localeCompare(a.date||'')));
+  const total = buckets.season_news.length + buckets.release_news.length + buckets.general_news.length;
+  if(total===0){
+    grid.innerHTML = `<div class="empty"><div class="big">📰</div><p>ما فيه أخبار جديدة لحد الآن.</p><p>تُفحص أعمالك تلقائيًا كل يوم.</p></div>`;
+    return;
+  }
+  grid.innerHTML = `<div style="grid-column:1/-1;max-width:760px;">` +
+    Object.keys(NEWS_LABELS).map(cat=>`
+      <div class="news-group">
+        <h4><span class="bar" style="background:${NEWS_COLORS[cat]}"></span>${NEWS_LABELS[cat]} <span style="color:var(--muted2);font-weight:400;">(${buckets[cat].length})</span></h4>
+        ${buckets[cat].length===0 ? `<div class="news-empty">لا يوجد جديد حتى الآن.</div>` :
+          buckets[cat].map(n=>`
+            <div class="news-item" data-open="${n.itemId}" style="cursor:pointer;">
+              <div class="d">${escapeHtml(n.date||'')} · <span style="color:${TYPE_COLORS[n.itemType]||'var(--muted)'}">${escapeHtml(n.itemTitle)}</span></div>
+              <div class="s">${escapeHtml(n.summary||'')}</div>
+              ${n.source?`<div class="src">المصدر: ${escapeHtml(n.source)}</div>`:''}
+            </div>`).join('')}
+      </div>`).join('') + `</div>`;
+  grid.querySelectorAll('[data-open]').forEach(el=>el.addEventListener('click', ()=> openDetail(el.dataset.open)));
 }
 function renderGrid(){
   const grid = document.getElementById('grid');
-  const list = visibleItems().filter(i=> activeSection==='all' || i.type===activeSection);
+  renderCollectionChips();
   if(catalogLoadFailed){
     grid.innerHTML = `<div class="empty"><div class="big">⚠️</div><p>تعذّر تحميل data/catalog.json</p><p>إذا تفتح الملف محليًا من جهازك، شغّل سيرفر محلي صغير (مثل: <span class="mono">npx serve .</span>) بدل فتح الملف مباشرة، أو انشره على GitHub Pages.</p></div>`;
     return;
   }
+  if(activeSection==='news'){ renderNewsFeed(); return; }
+  let list = visibleItems().filter(i=> activeSection==='all' || i.type===activeSection);
+  if(activeSection==='movie' && activeCollection) list = list.filter(i=>i.collection===activeCollection);
   if(list.length===0){
     grid.innerHTML = `<div class="empty"><div class="big">📼</div><p>القسم فاضي لين الحين.</p><p>اضغط «إضافة عمل» وابدأ أرشيفك.</p></div>`;
     return;
@@ -498,7 +662,9 @@ function renderGrid(){
   grid.innerHTML = list.map(item=>{
     const frac = progressFraction(item);
     const hasNews = (item.news.season_news.length + item.news.release_news.length + item.news.general_news.length) > 0;
-    const showStatus = (item.type==='series' || item.type==='anime') || item.status !== 'unclear';
+    const showStatus = SEASON_TYPES.has(item.type) || item.status !== 'unclear';
+    const seasonLine = SEASON_TYPES.has(item.type) ? `<div class="season-line">موسم ${item.progress.currentSeason}/${item.total_seasons||'؟'} · ${item.progress.watchedEpisodes||0}/${item.total_episodes||'؟'} حلقة</div>` : '';
+    const collLine = item.collection ? `<div class="coll-line">📁 ${escapeHtml(item.collection)}</div>` : '';
     return `
     <div class="card" data-id="${item.id}">
       <div class="poster ${item.poster_url?'':'no-img'}" style="${item.poster_url?`background-image:url('${escapeHtml(item.poster_url)}')`:''}">
@@ -513,16 +679,14 @@ function renderGrid(){
       <div class="perf"></div>
       <div class="stub">
         <div class="title">${escapeHtml(item.title)}</div>
-        <div class="meta-row">
-          <span class="year">${escapeHtml(item.year||'—')}</span>
-          <span class="wstatus">${WATCH_LABELS[item.progress.watchStatus]}</span>
-        </div>
+        <div class="meta-row"><span class="year">${escapeHtml(item.year||'—')}</span><span class="wstatus">${WATCH_LABELS[item.progress.watchStatus]}</span></div>
+        ${seasonLine}${collLine}
         <div class="progress-bar"><div style="width:${Math.round(frac*100)}%;background:${TYPE_COLORS[item.type]}"></div></div>
       </div>
     </div>`;
   }).join('');
   grid.querySelectorAll('.card').forEach(c=>c.addEventListener('click', ()=> openDetail(c.dataset.id)));
-  grid.querySelectorAll('.qa-btn').forEach(b=>b.addEventListener('click', (e)=>{
+  grid.querySelectorAll('.qa-btn').forEach(b=>b.addEventListener('click', async (e)=>{
     e.stopPropagation();
     const card = b.closest('.card');
     const id = card.dataset.id;
@@ -531,8 +695,8 @@ function renderGrid(){
     p.watchStatus = (p.watchStatus===action) ? 'planning' : action;
     p.updatedAt = new Date().toISOString();
     LOCAL.progress[id] = p;
-    saveLocal();
     renderAll();
+    await persistUserData();
   }));
 }
 function renderAll(){ renderNav(); renderTopbar(); renderGrid(); renderCheckStatus(); }
@@ -553,30 +717,52 @@ function renderAddModal(mode){
 
   if(mode === 'settings'){
     modal.innerHTML = `
-      <div class="modal-head"><h3>ربط مستودع GitHub</h3><button class="x-btn" data-close="addOverlay">✕</button></div>
+      <div class="modal-head"><h3>الإعدادات</h3><button class="x-btn" data-close="addOverlay">✕</button></div>
       <div class="modal-body">
-        <p class="hint">أدخل اسم مستودعك بصيغة <span class="mono">username/repo</span> (نفس المستودع اللي رفعت فيه ملفات هذا الموقع).</p>
+        <p class="hint">أدخل اسم مستودعك بصيغة <span class="mono">username/repo</span>.</p>
         <div class="field"><label>اسم المستودع</label><input type="text" id="repoInput" placeholder="username/watchlist" value="${escapeHtml(LOCAL.settings.repo||'')}"></div>
 
-        <p class="hint">اختياري: لإضافة الأعمال مباشرة من هذا الموقع بضغطة واحدة (بدون الذهاب لـ GitHub كل مرة)، أنشئ <a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener">Fine-grained Personal Access Token</a> وحدد فيه:</p>
-        <p class="hint" style="margin-top:-10px;">
-          • Repository access ← Only select repositories ← مستودعك فقط<br>
-          • Permissions ← Contents: Read and write<br>
-          • Permissions ← Actions: Read and write<br>
-          ⚠️ يُحفظ في متصفحك فقط، ولا تستخدمه على جهاز عام أو مشترك.
-        </p>
-        <div class="field"><label>GitHub Token (اختياري)</label><input type="password" id="tokenInput" placeholder="github_pat_..." value="${escapeHtml(LOCAL.settings.token||'')}"></div>
-
+        <p class="hint">لإضافة الأعمال وحفظ تقدّمك مباشرة من هذا الموقع، أنشئ <a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener">Fine-grained Token</a>:
+          Repository access ← مستودعك فقط · Permissions ← Contents: Read/write · Actions: Read/write.
+          ⚠️ يُحفظ بمتصفحك فقط، لا تستخدمه بجهاز مشترك.</p>
+        <div class="field"><label>GitHub Token</label><input type="password" id="tokenInput" placeholder="github_pat_..." value="${escapeHtml(LOCAL.settings.token||'')}"></div>
         <button class="btn btn-primary" id="saveRepoBtn" style="width:100%;justify-content:center;">حفظ والمتابعة</button>
+
+        <p class="hint" style="margin-top:18px;border-top:1px solid var(--line);padding-top:14px;">🔒 <b>تشفير بياناتك (اختياري):</b> يحمي تقدّمك وملاحظاتك بكلمة مرور حتى لو المستودع عام. كود فك التشفير علني (موقع بدون سيرفر)، فهو يحمي من المشاهدة العرضية لا من اختراق متعمد محترف.</p>
+        ${ENCRYPTION_ACTIVE ? `<button class="btn btn-secondary" id="changePassBtn" style="width:100%;justify-content:center;">تغيير كلمة المرور</button>` : `<button class="btn btn-secondary" id="enablePassBtn" style="width:100%;justify-content:center;">تفعيل التشفير</button>`}
       </div>`;
-    document.getElementById('saveRepoBtn').addEventListener('click', ()=>{
+    document.getElementById('saveRepoBtn').addEventListener('click', async ()=>{
       const val = document.getElementById('repoInput').value.trim().replace(/^https?:\/\/github\.com\//,'').replace(/\/$/,'');
       if(!val.includes('/')){ showToast('اكتب الاسم بصيغة username/repo', 'error'); return; }
       LOCAL.settings.repo = val;
       LOCAL.settings.token = document.getElementById('tokenInput').value.trim();
-      saveLocal(); renderCheckStatus();
+      saveSettings();
+      await loadUserData();
+      renderAll();
       showToast('تم الحفظ', 'success');
       renderAddModal(tokenSet() ? 'add-form' : 'add-link');
+    });
+    const enableBtn = document.getElementById('enablePassBtn');
+    if(enableBtn) enableBtn.addEventListener('click', async ()=>{
+      const p1 = prompt('اكتب كلمة مرور جديدة (احفظها بمكان آمن، ما نقدر نسترجعها لو نسيتها):');
+      if(!p1) return;
+      const p2 = prompt('أعد كتابة كلمة المرور للتأكيد:');
+      if(p1 !== p2){ showToast('كلمتا المرور غير متطابقتين', 'error'); return; }
+      PASSPHRASE = p1;
+      try{ sessionStorage.setItem(PASSPHRASE_SESSION_KEY, p1); }catch(e){}
+      const ok = await persistUserData();
+      if(ok){ ENCRYPTION_ACTIVE = true; showToast('تم تفعيل التشفير', 'success'); renderAddModal('settings'); renderAll(); }
+    });
+    const changeBtn = document.getElementById('changePassBtn');
+    if(changeBtn) changeBtn.addEventListener('click', async ()=>{
+      const p1 = prompt('كلمة مرور جديدة:');
+      if(!p1) return;
+      const p2 = prompt('أعد كتابتها للتأكيد:');
+      if(p1 !== p2){ showToast('غير متطابقتين', 'error'); return; }
+      PASSPHRASE = p1;
+      try{ sessionStorage.setItem(PASSPHRASE_SESSION_KEY, p1); }catch(e){}
+      const ok = await persistUserData();
+      if(ok) showToast('تم تغيير كلمة المرور', 'success');
     });
     return;
   }
@@ -585,8 +771,8 @@ function renderAddModal(mode){
     modal.innerHTML = `
       <div class="modal-head"><h3>إضافة عمل جديد</h3><button class="x-btn" data-close="addOverlay">✕</button></div>
       <div class="modal-body">
-        <p class="hint">الإضافة تتم من تبويب <b>Actions</b> في مستودعك على GitHub — نموذج بسيط بدون أي كود. بنفتحه لك الحين، عبّي الاسم والنوع واضغط <span class="mono">Run workflow</span>. العمل بيظهر هنا بعد دقيقة أو دقيقتين (حدّث الصفحة).</p>
-        <p class="hint">💡 ودّك تضيف بضغطة واحدة من هنا مباشرة؟ <button class="plain-link" id="setupTokenBtn" style="display:inline">فعّل ذلك من الإعدادات</button></p>
+        <p class="hint">الإضافة تتم من تبويب <b>Actions</b> بمستودعك. بنفتحه لك، عبّي الاسم والنوع واضغط Run workflow.</p>
+        <p class="hint">💡 ودّك تضيف بضغطة واحدة من هنا؟ <button class="plain-link" id="setupTokenBtn" style="display:inline">فعّل ذلك من الإعدادات</button></p>
         <button class="btn btn-primary" id="openActionsBtn" style="width:100%;justify-content:center;">فتح صفحة الإضافة على GitHub ↗</button>
       </div>`;
     document.getElementById('openActionsBtn').addEventListener('click', ()=> window.open(addItemLink(), '_blank', 'noopener'));
@@ -594,7 +780,6 @@ function renderAddModal(mode){
     return;
   }
 
-  // mode === 'add-form' (direct commit via GitHub API)
   modal.innerHTML = `
     <div class="modal-head"><h3>إضافة عمل جديد</h3><button class="x-btn" data-close="addOverlay">✕</button></div>
     <div class="modal-body">
@@ -616,21 +801,10 @@ function renderAddTypePick(){
   const wrap = document.getElementById('addTypePick');
   if(!wrap) return;
   wrap.innerHTML = Object.keys(TYPE_LABELS).map(t=>`
-    <button data-t="${t}" class="${addType===t?'sel':''}" style="${addType===t?`background:${TYPE_COLORS[t]};color:#10110f`:''}">${TYPE_LABELS[t]}</button>
-  `).join('');
+    <button data-t="${t}" class="${addType===t?'sel':''}" style="${addType===t?`background:${TYPE_COLORS[t]};color:#10110f`:''}">${TYPE_LABELS[t]}</button>`).join('');
   wrap.querySelectorAll('button').forEach(b=>b.addEventListener('click', ()=>{ addType=b.dataset.t; renderAddTypePick(); }));
 }
 
-/* ---------- direct GitHub commit (uses stored fine-grained PAT) ---------- */
-async function githubApi(path, options){
-  const res = await fetch(`https://api.github.com${path}`, Object.assign({
-    headers: Object.assign({
-      'Authorization': `Bearer ${LOCAL.settings.token}`,
-      'Accept': 'application/vnd.github+json'
-    }, (options && options.headers) || {})
-  }, options || {}));
-  return res;
-}
 async function submitAddDirect(){
   const title = document.getElementById('addTitleInput').value.trim();
   const yearInput = document.getElementById('addYearInput');
@@ -639,35 +813,11 @@ async function submitAddDirect(){
   const btn = document.getElementById('addSubmitBtn');
   btn.disabled = true; btn.innerHTML = '<span class="spin"></span> يضيف...';
   try{
-    const path = `/repos/${LOCAL.settings.repo}/contents/data/titles.json`;
-    const getRes = await githubApi(path);
-    if(!getRes.ok){
-      if(getRes.status===401 || getRes.status===403) throw new Error('التوكن غير صحيح أو لا يملك صلاحية كافية');
-      throw new Error('تعذّر قراءة titles.json (status '+getRes.status+')');
-    }
-    const getData = await getRes.json();
-    const currentArr = JSON.parse(base64ToUtf8(getData.content.replace(/\n/g,'')));
     const id = slugify(title, addType) + '-' + Date.now().toString(36).slice(-4);
-    currentArr.push({ id, title, type: addType, year_hint });
-    const newContent = utf8ToBase64(JSON.stringify(currentArr, null, 2) + '\n');
-    const putRes = await githubApi(path, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ message: `إضافة: ${title}`, content: newContent, sha: getData.sha, branch: 'main' })
-    });
-    if(!putRes.ok){
-      throw new Error('فشل الحفظ في GitHub (status '+putRes.status+')');
-    }
-    // trigger an immediate processing run (best effort — needs Actions:write on the token)
-    try{
-      await githubApi(`/repos/${LOCAL.settings.repo}/actions/workflows/daily-update.yml/dispatches`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ref: 'main' })
-      });
-    }catch(e){ /* non-fatal */ }
+    await appendTitleEntry({ id, title, type: addType, year_hint }, `إضافة: ${title}`);
+    await triggerItemRefresh(id);
     closeOverlay('addOverlay');
-    showToast('تمت الإضافة! بيظهر العمل ببياناته خلال دقيقة أو دقيقتين، حدّث الصفحة بعدها', 'success');
+    showToast('تمت الإضافة! بيظهر العمل ببياناته خلال دقيقة أو دقيقتين', 'success');
   }catch(e){
     console.error(e);
     showToast(e.message || 'حدث خطأ غير متوقع', 'error');
@@ -676,20 +826,9 @@ async function submitAddDirect(){
   }
 }
 
-/* ===================== GLOBAL "REFRESH" ===================== */
 document.getElementById('refreshAllBtn').addEventListener('click', async ()=>{
   await loadCatalog(); renderAll();
-  if(!repoSet()){ openSettingsModal(); showToast('اربط مستودعك أولًا', 'error'); return; }
-  if(tokenSet()){
-    try{
-      const res = await githubApi(`/repos/${LOCAL.settings.repo}/actions/workflows/daily-update.yml/dispatches`, {
-        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ref: 'main' })
-      });
-      if(res.ok){ showToast('تم تشغيل التحديث على GitHub — راجع الصفحة بعد دقيقة أو دقيقتين', 'success'); return; }
-    }catch(e){ /* fall through to deep link */ }
-  }
-  window.open(updateNowLink(), '_blank', 'noopener');
-  showToast('فتحنا صفحة GitHub — اضغط Run workflow لتشغيل التحديث الآن', 'success');
+  await triggerItemRefresh(null);
 });
 
 /* ===================== DETAIL MODAL ===================== */
@@ -698,22 +837,39 @@ function openDetail(id){
   renderDetail();
   openOverlay('detailOverlay');
 }
+function renderSuggestionsContent(raw){
+  if(raw.type !== 'anime' || raw.external_source !== 'jikan'){
+    return `<p class="hint">الاقتراحات التلقائية متاحة للأنمي فقط حاليًا (عبر MyAnimeList). لباقي الأنواع استخدم "المجموعات" بقسم الأفلام للتنظيم اليدوي.</p>`;
+  }
+  const rel = raw.relations||[];
+  const rec = raw.recommendations||[];
+  let html = `<h4 style="font-size:12.5px;margin:0 0 8px;font-weight:700;">أعمال مشتقة / مرتبطة</h4>`;
+  html += rel.length===0 ? `<div class="news-empty">لا يوجد.</div>` : rel.map(r=>`
+    <div class="news-item" style="display:flex;justify-content:space-between;align-items:center;gap:10px;">
+      <div><div class="d">${escapeHtml(REL_LABELS[r.relation]||r.relation)}</div><div class="s">${escapeHtml(r.name)}</div></div>
+      <button class="btn btn-secondary" data-add-suggestion="${r.mal_id}" data-add-name="${escapeHtml(r.name)}" style="flex:none;padding:6px 10px;font-size:12px;">➕ أضف</button>
+    </div>`).join('');
+  html += `<h4 style="font-size:12.5px;margin:16px 0 8px;font-weight:700;">أعمال مشابهة (أحبها مشاهدو هذا العمل)</h4>`;
+  html += rec.length===0 ? `<div class="news-empty">لا يوجد.</div>` : rec.map(r=>`
+    <div class="news-item" style="display:flex;justify-content:space-between;align-items:center;gap:10px;">
+      <div class="s">${escapeHtml(r.title)}</div>
+      <button class="btn btn-secondary" data-add-suggestion="${r.mal_id}" data-add-name="${escapeHtml(r.title)}" style="flex:none;padding:6px 10px;font-size:12px;">➕ أضف</button>
+    </div>`).join('');
+  return html;
+}
 function renderDetail(){
   const raw = findRawItem(activeDetailId);
   if(!raw) return;
   const item = mergedItem(raw);
   const modal = document.getElementById('detailModal');
-  const showSeasonFields = (item.type==='series' || item.type==='anime');
+  const showSeasonFields = SEASON_TYPES.has(item.type);
   modal.innerHTML = `
-    <div class="modal-head">
-      <h3>${escapeHtml(item.title)}</h3>
-      <button class="x-btn" id="detailCloseBtn">✕</button>
-    </div>
+    <div class="modal-head"><h3>${escapeHtml(item.title)}</h3><button class="x-btn" id="detailCloseBtn">✕</button></div>
     <div class="detail-top">
       <div class="detail-poster" style="${item.poster_url?`background-image:url('${escapeHtml(item.poster_url)}')`:''}"></div>
       <div class="detail-info">
         <h3>${escapeHtml(item.title)}</h3>
-        <div class="sub">${escapeHtml(item.year||'—')} · ${TYPE_LABELS[item.type]}</div>
+        <div class="sub">${escapeHtml(item.year||'—')} · ${TYPE_LABELS[item.type]}${showSeasonFields?` · ${item.total_seasons||'؟'} موسم / ${item.total_episodes||'؟'} حلقة`:''}${item.collection?` · 📁 ${escapeHtml(item.collection)}`:''}</div>
         <p>${escapeHtml(item.description||'لا يوجد وصف.')}</p>
         <span class="status-pill" style="background:${STATUS_COLORS[item.status]}22;color:${STATUS_COLORS[item.status]}">${STATUS_LABELS[item.status]}</span>
       </div>
@@ -722,20 +878,43 @@ function renderDetail(){
       <button data-tab="overview" class="${activeDetailTab==='overview'?'active':''}">نظرة عامة</button>
       <button data-tab="progress" class="${activeDetailTab==='progress'?'active':''}">تقدّمي</button>
       <button data-tab="news" class="${activeDetailTab==='news'?'active':''}">الأخبار ${(item.news.season_news.length+item.news.release_news.length+item.news.general_news.length)>0?'●':''}</button>
+      <button data-tab="suggestions" class="${activeDetailTab==='suggestions'?'active':''}">اقتراحات</button>
     </div>
     <div class="tab-panel ${activeDetailTab==='overview'?'':'hidden'}" data-panel="overview">
-      <p class="hint">${AUTO_FETCH_TYPES.has(item.type) ? 'هذه البيانات تجي تلقائيًا من GitHub. أي تعديل هنا يُحفظ في متصفحك فقط كتخصيص شخصي.' : 'هذا النوع بدون مصدر بيانات تلقائي — عبّي البيانات يدويًا، تُحفظ في متصفحك.'}</p>
+      ${AUTO_FETCH_TYPES.has(item.type) ? `<button class="btn btn-secondary" id="refetchBtn" style="width:100%;justify-content:center;margin-bottom:14px;">🔄 إعادة جلب الصور والتفاصيل تلقائيًا</button>` : `<p class="hint">هذا النوع بدون مصدر بيانات تلقائي — عبّي البيانات يدويًا.</p>`}
+
+      ${AUTO_FETCH_TYPES.has(item.type) ? `
+      <div class="field"><label>تصحيح المطابقة (لو البوستر أو المعلومات غلط)</label>
+        <div style="display:flex;gap:8px;">
+          <input type="text" id="rematchQuery" value="${escapeHtml(item.title)}" placeholder="اكتب الاسم الصحيح...">
+          <button class="btn btn-secondary" id="rematchBtn" style="flex:none;">بحث</button>
+        </div>
+        <div id="rematchResults" style="margin-top:10px;"></div>
+      </div>` : ''}
+
       <div class="field"><label>رابط البوستر</label><input type="text" id="editPoster" value="${escapeHtml(item.poster_url)}" placeholder="https://..."></div>
       <div class="grid2">
         <div class="field"><label>السنة</label><input type="text" id="editYear" value="${escapeHtml(item.year)}"></div>
         <div class="field"><label>الحالة</label>
-          <select id="editStatus">
-            ${Object.keys(STATUS_LABELS).map(s=>`<option value="${s}" ${item.status===s?'selected':''}>${STATUS_LABELS[s]}</option>`).join('')}
-          </select>
+          <select id="editStatus">${Object.keys(STATUS_LABELS).map(s=>`<option value="${s}" ${item.status===s?'selected':''}>${STATUS_LABELS[s]}</option>`).join('')}</select>
         </div>
       </div>
       <div class="field"><label>الوصف</label><textarea id="editDesc">${escapeHtml(item.description)}</textarea></div>
-      <button class="btn btn-secondary" id="saveOverviewBtn" style="width:100%;justify-content:center;">حفظ التخصيص محليًا</button>
+      <button class="btn btn-secondary" id="saveOverviewBtn" style="width:100%;justify-content:center;">حفظ التخصيص</button>
+
+      ${item.type==='movie' ? `
+      <div class="field" style="margin-top:18px;"><label>المجموعة / السلسلة (مثل: DC، Marvel)</label>
+        <div style="display:flex;gap:8px;">
+          <input type="text" id="editCollection" value="${escapeHtml(item.collection||'')}" placeholder="اكتب اسم المجموعة...">
+          <button class="btn btn-secondary" id="saveCollectionBtn" style="flex:none;">حفظ</button>
+        </div>
+      </div>` : ''}
+
+      <div class="field" style="margin-top:18px;"><label>نقل لتصنيف آخر</label>
+        <select id="editType">${Object.keys(TYPE_LABELS).map(t=>`<option value="${t}" ${item.type===t?'selected':''}>${TYPE_LABELS[t]}</option>`).join('')}</select>
+      </div>
+      <button class="btn btn-secondary" id="moveTypeBtn" style="width:100%;justify-content:center;">نقل لهذا التصنيف</button>
+
       <div style="text-align:center;margin-top:16px;display:flex;gap:14px;justify-content:center;">
         <button class="danger-link" id="hideItemBtn">إخفاء من أرشيفي</button>
         <button class="danger-link" id="deleteSourceBtn">حذف نهائي من المصدر ↗</button>
@@ -743,33 +922,19 @@ function renderDetail(){
     </div>
     <div class="tab-panel ${activeDetailTab==='progress'?'':'hidden'}" data-panel="progress">
       <div class="field"><label>حالة المتابعة</label>
-        <select id="editWatchStatus">
-          ${Object.keys(WATCH_LABELS).map(s=>`<option value="${s}" ${item.progress.watchStatus===s?'selected':''}>${WATCH_LABELS[s]}</option>`).join('')}
-        </select>
+        <select id="editWatchStatus">${Object.keys(WATCH_LABELS).map(s=>`<option value="${s}" ${item.progress.watchStatus===s?'selected':''}>${WATCH_LABELS[s]}</option>`).join('')}</select>
       </div>
       ${showSeasonFields ? `
         <div class="grid2">
-          <div class="field"><label>الموسم الحالي</label>
-            <div class="stepper">
-              <button data-step="season" data-d="-1">−</button>
-              <span class="val" id="seasonVal">${item.progress.currentSeason}</span>
-              <button data-step="season" data-d="1">+</button>
-              <span style="color:var(--muted2);font-size:12px;">/ ${item.total_seasons||'؟'}</span>
-            </div>
+          <div class="field"><label>الموسم الحالي (من ${item.total_seasons||'؟'})</label>
+            <div class="stepper"><button data-step="season" data-d="-1">−</button><span class="val" id="seasonVal">${item.progress.currentSeason}</span><button data-step="season" data-d="1">+</button></div>
           </div>
-          <div class="field"><label>الحلقات المشاهدة</label>
-            <div class="stepper">
-              <button data-step="episode" data-d="-1">−</button>
-              <span class="val" id="episodeVal">${item.progress.watchedEpisodes}</span>
-              <button data-step="episode" data-d="1">+</button>
-              <span style="color:var(--muted2);font-size:12px;">/ ${item.total_episodes||'؟'}</span>
-            </div>
+          <div class="field"><label>الحلقات المشاهدة (من ${item.total_episodes||'؟'})</label>
+            <div class="stepper"><button data-step="episode" data-d="-1">−</button><span class="val" id="episodeVal">${item.progress.watchedEpisodes}</span><button data-step="episode" data-d="1">+</button></div>
           </div>
         </div>` : ``}
       <div class="field"><label>تقييمي (من 10)</label>
-        <div class="rate-row" id="rateRow">
-          ${Array.from({length:10},(_,i)=>i+1).map(n=>`<button data-rate="${n}" class="${item.progress.rating===n?'sel':''}">${n}</button>`).join('')}
-        </div>
+        <div class="rate-row" id="rateRow">${Array.from({length:10},(_,i)=>i+1).map(n=>`<button data-rate="${n}" class="${item.progress.rating===n?'sel':''}">${n}</button>`).join('')}</div>
       </div>
       <div class="field"><label>ملاحظاتي</label><textarea id="editNotes" placeholder="أي ملاحظات شخصية...">${escapeHtml(item.progress.notes)}</textarea></div>
       <button class="btn btn-secondary" id="saveProgressBtn" style="width:100%;justify-content:center;">حفظ التقدّم</button>
@@ -783,49 +948,97 @@ function renderDetail(){
         <div class="news-group">
           <h4><span class="bar" style="background:${NEWS_COLORS[cat]}"></span>${NEWS_LABELS[cat]}</h4>
           ${item.news[cat].length===0 ? `<div class="news-empty">لا يوجد جديد حتى الآن.</div>` :
-            item.news[cat].map(n=>`
-              <div class="news-item">
-                <div class="d">${escapeHtml(n.date||'')}</div>
-                <div class="s">${escapeHtml(n.summary||'')}</div>
-                ${n.source?`<div class="src">المصدر: ${escapeHtml(n.source)}</div>`:''}
-              </div>`).join('')}
-        </div>
-      `).join('')}
+            item.news[cat].map(n=>`<div class="news-item"><div class="d">${escapeHtml(n.date||'')}</div><div class="s">${escapeHtml(n.summary||'')}</div>${n.source?`<div class="src">المصدر: ${escapeHtml(n.source)}</div>`:''}</div>`).join('')}
+        </div>`).join('')}
+    </div>
+    <div class="tab-panel ${activeDetailTab==='suggestions'?'':'hidden'}" data-panel="suggestions">
+      ${renderSuggestionsContent(raw)}
     </div>
   `;
-  wireDetailEvents(item);
+  wireDetailEvents(item, raw);
 }
-function wireDetailEvents(item){
+function wireDetailEvents(item, raw){
   document.getElementById('detailCloseBtn').addEventListener('click', ()=>closeOverlay('detailOverlay'));
-  document.querySelectorAll('#detailModal .tabs button').forEach(b=>b.addEventListener('click', ()=>{
-    activeDetailTab = b.dataset.tab; renderDetail();
-  }));
+  document.querySelectorAll('#detailModal .tabs button').forEach(b=>b.addEventListener('click', ()=>{ activeDetailTab = b.dataset.tab; renderDetail(); }));
+
+  const refetchBtn = document.getElementById('refetchBtn');
+  if(refetchBtn) refetchBtn.addEventListener('click', ()=> triggerItemRefresh(item.id));
+
+  const rematchBtn = document.getElementById('rematchBtn');
+  if(rematchBtn) rematchBtn.addEventListener('click', async ()=>{
+    const q = document.getElementById('rematchQuery').value.trim();
+    if(!q) return;
+    const box = document.getElementById('rematchResults');
+    box.innerHTML = '<p class="hint">يبحث...</p>';
+    const results = await searchMatches(q, item.type);
+    if(results.length===0){ box.innerHTML = '<p class="hint">ما لقينا نتائج.</p>'; return; }
+    box.innerHTML = results.map((r,i)=>`
+      <div class="match-result" data-idx="${i}">
+        ${r.poster?`<img src="${escapeHtml(r.poster)}">`:'<div class="ph"></div>'}
+        <div class="mr-info"><b>${escapeHtml(r.title)}</b>${escapeHtml(r.year)}</div>
+      </div>`).join('');
+    box.querySelectorAll('.match-result').forEach(el=>el.addEventListener('click', ()=>{
+      const r = results[parseInt(el.dataset.idx)];
+      pinExternalMatch(item.id, r.source, r.external_id, {poster:r.poster});
+    }));
+  });
 
   const saveOverviewBtn = document.getElementById('saveOverviewBtn');
-  if(saveOverviewBtn) saveOverviewBtn.addEventListener('click', ()=>{
+  if(saveOverviewBtn) saveOverviewBtn.addEventListener('click', async ()=>{
     LOCAL.overrides[item.id] = {
       poster_url: document.getElementById('editPoster').value.trim(),
       year: document.getElementById('editYear').value.trim(),
       status: document.getElementById('editStatus').value,
+      _statusBaseline: raw.status,
       description: document.getElementById('editDesc').value.trim()
     };
-    saveLocal(); renderAll(); showToast('تم حفظ التخصيص', 'success');
+    renderAll();
+    await persistUserData();
+    showToast('تم حفظ التخصيص', 'success');
+  });
+
+  const saveCollectionBtn = document.getElementById('saveCollectionBtn');
+  if(saveCollectionBtn) saveCollectionBtn.addEventListener('click', async ()=>{
+    if(!repoSet()||!tokenSet()){ openSettingsModal(); showToast('يحتاج توكن', 'error'); return; }
+    const val = document.getElementById('editCollection').value.trim();
+    try{
+      await updateTitleEntry(item.id, {collection: val||null}, `مجموعة: ${item.title}`);
+      await triggerItemRefresh(item.id);
+      showToast('تم الحفظ', 'success');
+    }catch(e){ showToast(e.message||'خطأ','error'); }
+  });
+
+  const moveBtn = document.getElementById('moveTypeBtn');
+  if(moveBtn) moveBtn.addEventListener('click', async ()=>{
+    const newType = document.getElementById('editType').value;
+    if(newType === item.type){ showToast('العمل بهذا التصنيف أصلًا', 'error'); return; }
+    if(!repoSet()){ openSettingsModal(); showToast('اربط مستودعك أولًا', 'error'); return; }
+    if(!tokenSet()){ window.open(editTitlesLink(), '_blank', 'noopener'); showToast('بدون توكن: غيّر "type" يدويًا بالملف المفتوح', 'error'); return; }
+    moveBtn.disabled = true; moveBtn.textContent = 'ينقل...';
+    try{
+      await updateTitleEntry(item.id, {type:newType}, `نقل: ${item.title} -> ${TYPE_LABELS[newType]}`);
+      await triggerItemRefresh(item.id);
+      closeOverlay('detailOverlay');
+      showToast('تم النقل! حدّث الصفحة بعد دقيقة', 'success');
+    }catch(e){ showToast(e.message || 'خطأ غير متوقع', 'error'); }
+    finally{ moveBtn.disabled=false; moveBtn.textContent='نقل لهذا التصنيف'; }
   });
 
   const hideBtn = document.getElementById('hideItemBtn');
   if(hideBtn) hideBtn.addEventListener('click', ()=>{
-    showConfirm(`إخفاء «${item.title}» من أرشيفك في هذا المتصفح؟`, ()=>{
+    showConfirm(`إخفاء «${item.title}» من أرشيفك؟`, async ()=>{
       LOCAL.hidden[item.id] = true;
-      saveLocal();
       closeOverlay('detailOverlay'); closeOverlay('confirmOverlay');
-      renderAll(); showToast('تم الإخفاء', 'success');
+      renderAll();
+      await persistUserData();
+      showToast('تم الإخفاء', 'success');
     });
   });
   const delSrcBtn = document.getElementById('deleteSourceBtn');
   if(delSrcBtn) delSrcBtn.addEventListener('click', ()=>{
     if(!repoSet()){ closeOverlay('detailOverlay'); openSettingsModal(); showToast('اربط مستودعك أولًا', 'error'); return; }
     window.open(editTitlesLink(), '_blank', 'noopener');
-    showToast('احذف العنصر من titles.json ثم احفظ — سيختفي من القائمة بالتحديث القادم', 'success');
+    showToast('احذف العنصر من titles.json ثم احفظ — سيختفي بالتحديث القادم', 'success');
   });
 
   document.querySelectorAll('[data-step]').forEach(b=>b.addEventListener('click', ()=>{
@@ -843,58 +1056,50 @@ function wireDetailEvents(item){
     document.querySelectorAll('[data-rate]').forEach(x=>x.classList.toggle('sel', parseInt(x.dataset.rate)===p.rating));
   }));
   const saveProgressBtn = document.getElementById('saveProgressBtn');
-  if(saveProgressBtn) saveProgressBtn.addEventListener('click', ()=>{
+  if(saveProgressBtn) saveProgressBtn.addEventListener('click', async ()=>{
     const p = getProgress(item.id);
     p.watchStatus = document.getElementById('editWatchStatus').value;
     p.notes = document.getElementById('editNotes').value;
     p.updatedAt = new Date().toISOString();
     LOCAL.progress[item.id] = p;
-    saveLocal(); renderAll(); showToast('تم حفظ تقدّمك', 'success');
+    renderAll();
+    await persistUserData();
+    showToast('تم حفظ تقدّمك', 'success');
   });
 
   const refreshOneBtn = document.getElementById('refreshOneBtn');
-  if(refreshOneBtn) refreshOneBtn.addEventListener('click', async ()=>{
-    if(!repoSet()){ closeOverlay('detailOverlay'); openSettingsModal(); showToast('اربط مستودعك أولًا', 'error'); return; }
-    if(tokenSet()){
-      try{
-        const res = await githubApi(`/repos/${LOCAL.settings.repo}/actions/workflows/daily-update.yml/dispatches`, {
-          method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ref:'main'})
-        });
-        if(res.ok){ showToast('تم تشغيل التحديث — راجع بعد دقيقة أو دقيقتين', 'success'); return; }
-      }catch(e){ /* fall through */ }
-    }
-    window.open(updateNowLink(), '_blank', 'noopener');
-  });
+  if(refreshOneBtn) refreshOneBtn.addEventListener('click', ()=> triggerItemRefresh(item.id));
+
+  document.querySelectorAll('[data-add-suggestion]').forEach(b=>b.addEventListener('click', ()=>{
+    addSuggestedAnime(parseInt(b.dataset.addSuggestion), b.dataset.addName);
+  }));
 }
 
 /* ===================== EXPORT / IMPORT ===================== */
 document.getElementById('exportBtn').addEventListener('click', ()=>{
-  const exportable = {
-    progress: LOCAL.progress, overrides: LOCAL.overrides, hidden: LOCAL.hidden,
-    settings: { repo: LOCAL.settings.repo }   // token intentionally excluded from backups
-  };
+  const exportable = { progress: LOCAL.progress, overrides: LOCAL.overrides, hidden: LOCAL.hidden };
   const blob = new Blob([JSON.stringify(exportable, null, 2)], {type:'application/json'});
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url; a.download = 'archive-backup.json';
   document.body.appendChild(a); a.click(); a.remove();
   URL.revokeObjectURL(url);
-  showToast('تم تصدير نسخة احتياطية (بدون التوكن لأمانك)', 'success');
+  showToast('تم تصدير نسخة احتياطية', 'success');
 });
 document.getElementById('importBtn').addEventListener('click', ()=> document.getElementById('importFile').click());
 document.getElementById('importFile').addEventListener('change', (e)=>{
   const file = e.target.files[0];
   if(!file) return;
   const reader = new FileReader();
-  reader.onload = ()=>{
+  reader.onload = async ()=>{
     try{
       const parsed = JSON.parse(reader.result);
       LOCAL.progress = Object.assign({}, LOCAL.progress, parsed.progress||{});
       LOCAL.overrides = Object.assign({}, LOCAL.overrides, parsed.overrides||{});
       LOCAL.hidden = Object.assign({}, LOCAL.hidden, parsed.hidden||{});
-      if(parsed.settings && parsed.settings.repo) LOCAL.settings.repo = parsed.settings.repo;
-      saveLocal(); renderAll();
-      showToast('تم استيراد بياناتك (تمت إضافتها لما هو موجود، بدون استبدال)', 'success');
+      renderAll();
+      await persistUserData();
+      showToast('تم استيراد بياناتك (أُضيفت لما هو موجود)', 'success');
     }catch(err){ showToast('ملف غير صالح', 'error'); }
   };
   reader.readAsText(file);
@@ -904,30 +1109,29 @@ document.getElementById('importFile').addEventListener('change', (e)=>{
 /* ===================== CONFIRM ===================== */
 function showConfirm(message, onYes){
   const box = document.getElementById('confirmBox');
-  box.innerHTML = `<p>${escapeHtml(message)}</p>
-    <div class="confirm-actions">
-      <button class="btn btn-secondary" id="confirmNo">إلغاء</button>
-      <button class="btn btn-primary" id="confirmYes" style="background:var(--danger);color:#fff;">تأكيد</button>
-    </div>`;
+  box.innerHTML = `<p>${escapeHtml(message)}</p><div class="confirm-actions"><button class="btn btn-secondary" id="confirmNo">إلغاء</button><button class="btn btn-primary" id="confirmYes" style="background:var(--danger);color:#fff;">تأكيد</button></div>`;
   openOverlay('confirmOverlay');
   document.getElementById('confirmNo').addEventListener('click', ()=>closeOverlay('confirmOverlay'));
   document.getElementById('confirmYes').addEventListener('click', onYes);
 }
 document.getElementById('resetBtn').addEventListener('click', ()=>{
-  showConfirm('سيُحذف تقدّمك وتقييماتك وملاحظاتك وإعداداتك المحفوظة في هذا المتصفح فقط (لن يتأثر أرشيفك على GitHub). متأكد؟', ()=>{
-    LOCAL = { progress:{}, overrides:{}, hidden:{}, settings:{repo:'',token:''} };
-    saveLocal();
+  showConfirm('سيُحذف تقدّمك وتقييماتك وملاحظاتك من المستودع ومن متصفحك، وتُحذف إعدادات الربط المحفوظة. متأكد؟', async ()=>{
+    LOCAL.progress = {}; LOCAL.overrides = {}; LOCAL.hidden = {};
+    PASSPHRASE = null;
+    await persistUserData();
+    LOCAL.settings = {repo:'', token:''};
+    saveSettings();
+    try{ sessionStorage.removeItem(PASSPHRASE_SESSION_KEY); }catch(e){}
+    ENCRYPTION_ACTIVE = false; NEEDS_UNLOCK = false;
     closeOverlay('confirmOverlay');
     renderAll();
     showToast('تم التصفير', 'success');
   });
 });
 
-/* ===================== OVERLAY CLOSE HELPERS ===================== */
 document.querySelectorAll('[data-close]').forEach(b=>b.addEventListener('click', ()=>closeOverlay(b.dataset.close)));
 document.querySelectorAll('.overlay').forEach(ov=>ov.addEventListener('click', e=>{ if(e.target===ov) closeOverlay(ov.id); }));
 
-/* ===================== COMPAT BANNER ===================== */
 function maybeShowBanner(){
   const banner = document.getElementById('compatBanner');
   if(location.protocol === 'file:'){
@@ -939,10 +1143,9 @@ function maybeShowBanner(){
   }
 }
 
-/* ===================== INIT ===================== */
 async function init(){
-  loadLocal();
-  await loadCatalog();
+  loadSettings();
+  await Promise.all([loadCatalog(), loadUserData()]);
   renderAll();
   maybeShowBanner();
 }

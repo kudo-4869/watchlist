@@ -1,16 +1,26 @@
 // scripts/update.mjs
-// Run by GitHub Actions (daily cron + manual dispatch + add-item flow).
-// Reads data/titles.json, enriches each entry via TVmaze (series/anime) + iTunes Search (movies)
-// — both completely free with NO signup or API key required — translates descriptions/news to
-// Arabic via the free Google Translate endpoint, diffs against the previous catalog.json to
-// auto-detect delays/renewals/cancellations, scans Google News RSS for related news, classifies
-// it by keyword, and writes the result to data/catalog.json.
+// Run by GitHub Actions (daily cron + manual dispatch + add-item/refresh/move flows).
 //
-// "play", "story" and "game" items have no automatic data source — they're manual-only
-// (set poster/description/status via the site's local overrides).
+// Data sources (all free, no signup):
+//   - Jikan (MyAnimeList wrapper): anime — poster, synopsis, status, episodes, relations, recommendations
+//   - TVmaze: series/cartoon (and anime fallback if not found on MAL)
+//   - iTunes Search: movies (and anime-film fallback)
+//
+// If a title entry has external_source + external_id ("pinned" via the site's re-match search),
+// that exact record is fetched directly instead of doing a fuzzy text search — this fixes
+// wrong/mismatched auto-fetched data permanently.
+//
+// Descriptions and English news titles are translated to Arabic via a free Google Translate
+// endpoint. News is scanned via Google News RSS and classified by keyword. Status changes,
+// cancellations, and new seasons/episodes are auto-detected and logged. If a previously
+// "completed" item gets a new season/episode, the user's personal watch status flips to
+// "incomplete" so they notice. If the underlying status itself reaches "completed", any stale
+// manual status override is dropped (handled client-side, see index.html).
+//
+// "play", "story" and "game" items have no automatic data source — manual-only.
 //
 // Env vars:
-//   ONLY_ID - optional, limit processing to a single title id (used right after adding an item)
+//   ONLY_ID - optional, limit processing to a single title id
 
 import fs from 'fs';
 
@@ -18,9 +28,10 @@ const ONLY_ID = process.env.ONLY_ID || null;
 
 const TITLES_PATH = 'data/titles.json';
 const CATALOG_PATH = 'data/catalog.json';
+const USERDATA_PATH = 'data/userdata.json';
 
 const STATUS_AR = { ongoing: 'مستمر', completed: 'مكتمل', unclear: 'غير منتهي', cancelled: 'تكنسل' };
-const AUTO_FETCH_TYPES = new Set(['series', 'anime', 'movie']);
+const AUTO_FETCH_TYPES = new Set(['series', 'anime', 'cartoon', 'movie']);
 
 const CANCEL_KEYWORDS = ['cancel', 'canceled', 'cancelled', 'إلغاء', 'الغاء'];
 const RENEW_KEYWORDS = ['renew', 'season 2', 'season two', 'new season', 'next season', 'final season', 'تجديد', 'موسم جديد', 'موسم ثاني', 'موسم ثالث', 'موسم رابع'];
@@ -30,7 +41,7 @@ const RELEASE_KEYWORDS = [
   'موعد العرض', 'تأجيل', 'تاجيل', 'تاريخ العرض', 'تاريخ الإصدار', 'الحلقة القادمة', 'يعرض في'
 ];
 
-/* ---------- helpers ---------- */
+/* ---------- generic helpers ---------- */
 function readJSON(path, fallback) {
   try { return JSON.parse(fs.readFileSync(path, 'utf8')); } catch (e) { return fallback; }
 }
@@ -62,6 +73,7 @@ function bigArtwork(url) {
   if (!url) return '';
   return url.replace(/\d+x\d+bb(\.\w+)$/, '600x600bb$1');
 }
+function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
 
 /* ---------- free translation (no key, best-effort) ---------- */
 async function translateToArabic(text) {
@@ -81,7 +93,7 @@ async function translateToArabic(text) {
   }
 }
 
-/* ---------- Google News RSS (free, no key, server-side so no CORS issue) ---------- */
+/* ---------- Google News RSS (free, no key) ---------- */
 async function fetchGoogleNewsRSS(query, hl, gl, ceid) {
   const url = `https://news.google.com/rss/search?q=${encodeURIComponent(query)}&hl=${hl}&gl=${gl}&ceid=${ceid}`;
   try {
@@ -107,10 +119,66 @@ async function fetchGoogleNewsRSS(query, hl, gl, ceid) {
   }
 }
 
-/* ---------- TVmaze (series & anime, no key needed) ---------- */
+/* ---------- Jikan / MyAnimeList (anime, no key needed) ---------- */
+async function jikanSearch(title) {
+  try {
+    const res = await fetch(`https://api.jikan.moe/v4/anime?q=${encodeURIComponent(title)}&limit=5&sfw=true`);
+    if (!res.ok) return [];
+    const data = await res.json();
+    return data.data || [];
+  } catch (e) { return []; }
+}
+async function jikanFull(id) {
+  try {
+    const res = await fetch(`https://api.jikan.moe/v4/anime/${id}/full`);
+    if (!res.ok) return null;
+    const data = await res.json();
+    return data.data || null;
+  } catch (e) { return null; }
+}
+async function jikanRecommendations(id) {
+  try {
+    const res = await fetch(`https://api.jikan.moe/v4/anime/${id}/recommendations`);
+    if (!res.ok) return [];
+    const data = await res.json();
+    return (data.data || []).slice(0, 6).map(r => ({
+      mal_id: r.entry.mal_id,
+      title: r.entry.title,
+      image: r.entry.images && r.entry.images.jpg ? r.entry.images.jpg.image_url : ''
+    }));
+  } catch (e) { return []; }
+}
+function mapJikanStatus(s) {
+  const t = (s || '').toLowerCase();
+  if (t.includes('currently airing')) return 'ongoing';
+  if (t.includes('finished airing')) return 'completed';
+  return 'unclear'; // Not yet aired / unknown
+}
+function jikanRelations(raw) {
+  if (!raw || !raw.relations) return [];
+  const wanted = ['Sequel', 'Prequel', 'Side story', 'Spin-off', 'Alternative version', 'Full story'];
+  const out = [];
+  for (const rel of raw.relations) {
+    if (!wanted.includes(rel.relation)) continue;
+    for (const e of rel.entry) {
+      if (e.type !== 'anime') continue;
+      out.push({ relation: rel.relation, mal_id: e.mal_id, name: e.name });
+    }
+  }
+  return out.slice(0, 8);
+}
+
+/* ---------- TVmaze (series / cartoon / anime-fallback, no key needed) ---------- */
 async function tvmazeLookup(title) {
   try {
     const res = await fetch(`https://api.tvmaze.com/singlesearch/shows?q=${encodeURIComponent(title)}`);
+    if (!res.ok) return null;
+    return await res.json();
+  } catch (e) { return null; }
+}
+async function tvmazeById(id) {
+  try {
+    const res = await fetch(`https://api.tvmaze.com/shows/${id}`);
     if (!res.ok) return null;
     return await res.json();
   } catch (e) { return null; }
@@ -137,10 +205,10 @@ function mapTvmazeStatus(s) {
   const t = (s || '').toLowerCase();
   if (t.includes('ended')) return 'completed';
   if (t.includes('running')) return 'ongoing';
-  return 'unclear'; // To Be Determined / In Development / Pilot / missing
+  return 'unclear';
 }
 
-/* ---------- iTunes Search (movies, no key needed) ---------- */
+/* ---------- iTunes Search (movies / anime-film fallback, no key needed) ---------- */
 async function itunesLookupMovie(title, yearHint) {
   try {
     const res = await fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(title)}&media=movie&limit=8`);
@@ -155,25 +223,28 @@ async function itunesLookupMovie(title, yearHint) {
     return results[0];
   } catch (e) { return null; }
 }
-async function itunesLongDescription(trackId) {
+async function itunesById(id) {
   try {
-    const res = await fetch(`https://itunes.apple.com/lookup?id=${trackId}`);
-    if (!res.ok) return '';
+    const res = await fetch(`https://itunes.apple.com/lookup?id=${id}`);
+    if (!res.ok) return null;
     const data = await res.json();
-    const r = (data.results || [])[0];
-    return r ? (r.longDescription || r.shortDescription || '') : '';
-  } catch (e) { return ''; }
+    return (data.results || [])[0] || null;
+  } catch (e) { return null; }
+}
+async function itunesLongDescription(trackId) {
+  const r = await itunesById(trackId);
+  return r ? (r.longDescription || r.shortDescription || '') : '';
 }
 
 /* ---------- per-item processing ---------- */
 async function processItem(titleEntry, prev) {
-  const { id, title, type, year_hint } = titleEntry;
+  const { id, title, type, year_hint, external_source, external_id, collection } = titleEntry;
   const news = { season_news: [], release_news: [], general_news: [] };
 
   const meta = {
-    id,
-    title,
-    type,
+    id, title, type, collection: collection || null,
+    external_source: external_source || prev?.external_source || null,
+    external_id: external_id || prev?.external_id || null,
     year: prev?.year || '',
     poster_url: prev?.poster_url || '',
     description: prev?.description || '',
@@ -181,7 +252,9 @@ async function processItem(titleEntry, prev) {
     status: prev?.status || 'unclear',
     total_seasons: prev?.total_seasons || null,
     total_episodes: prev?.total_episodes || null,
-    next_episode_date: prev?.next_episode_date || null
+    next_episode_date: prev?.next_episode_date || null,
+    relations: prev?.relations || [],
+    recommendations: prev?.recommendations || []
   };
 
   let forceCancelled = false;
@@ -189,8 +262,11 @@ async function processItem(titleEntry, prev) {
   if (AUTO_FETCH_TYPES.has(type)) {
     try {
       if (type === 'movie') {
-        const found = await itunesLookupMovie(title, year_hint);
+        let found = null;
+        if (external_source === 'itunes' && external_id) found = await itunesById(external_id);
+        if (!found) found = await itunesLookupMovie(title, year_hint);
         if (found) {
+          meta.external_source = 'itunes'; meta.external_id = found.trackId;
           meta.title = found.trackName || title;
           meta.year = (found.releaseDate || '').slice(0, 4) || meta.year;
           meta.poster_url = bigArtwork(found.artworkUrl100) || meta.poster_url;
@@ -199,66 +275,75 @@ async function processItem(titleEntry, prev) {
             meta.description = await translateToArabic(rawDesc);
             meta.description_en = rawDesc;
           }
-        } else {
-          console.log('No iTunes match for', title);
+        } else { console.log('No iTunes match for', title); }
+
+      } else if (type === 'anime') {
+        let jikanRaw = null;
+        if (external_source === 'jikan' && external_id) {
+          jikanRaw = await jikanFull(external_id);
+        } else if (!external_source) {
+          const results = await jikanSearch(title);
+          if (results.length) jikanRaw = await jikanFull(results[0].mal_id);
+          await sleep(450);
         }
-      } else {
-        // series or anime
-        let found = await tvmazeLookup(title);
-        if (!found && type === 'anime') {
-          // some anime are released as films rather than TV series — fall back to iTunes movies
-          found = null;
-          const movieFallback = await itunesLookupMovie(title, year_hint);
-          if (movieFallback) {
-            meta.title = movieFallback.trackName || title;
-            meta.year = (movieFallback.releaseDate || '').slice(0, 4) || meta.year;
-            meta.poster_url = bigArtwork(movieFallback.artworkUrl100) || meta.poster_url;
-            const rawDesc = (await itunesLongDescription(movieFallback.trackId)) || '';
-            if (rawDesc && rawDesc !== meta.description_en) {
-              meta.description = await translateToArabic(rawDesc);
-              meta.description_en = rawDesc;
-            }
-          } else {
-            console.log('No TVmaze or iTunes match for', title);
-          }
-        } else if (found) {
-          meta.title = found.name || title;
-          meta.year = (found.premiered || '').slice(0, 4) || meta.year;
-          meta.poster_url = (found.image && (found.image.original || found.image.medium)) || meta.poster_url;
-          const rawDesc = stripHtml(found.summary || '');
+        if (jikanRaw) {
+          meta.external_source = 'jikan'; meta.external_id = jikanRaw.mal_id;
+          meta.title = jikanRaw.title || title;
+          meta.year = jikanRaw.aired && jikanRaw.aired.prop && jikanRaw.aired.prop.from ? String(jikanRaw.aired.prop.from.year || '') : meta.year;
+          meta.poster_url = (jikanRaw.images && jikanRaw.images.jpg ? jikanRaw.images.jpg.large_image_url : '') || meta.poster_url;
+          const rawDesc = stripHtml(jikanRaw.synopsis || '');
           if (rawDesc && rawDesc !== meta.description_en) {
             meta.description = await translateToArabic(rawDesc);
             meta.description_en = rawDesc;
           }
-          meta.status = mapTvmazeStatus(found.status);
-
-          const counts = await tvmazeEpisodeCounts(found.id);
-          meta.total_seasons = counts.seasons || meta.total_seasons;
-          meta.total_episodes = counts.episodes || meta.total_episodes;
-
-          const newNextDate = await tvmazeNextEpisode(found.id);
+          meta.status = mapJikanStatus(jikanRaw.status);
+          meta.total_seasons = meta.total_seasons || 1;
+          meta.total_episodes = jikanRaw.episodes || meta.total_episodes;
+          meta.relations = jikanRelations(jikanRaw);
+          await sleep(450);
+          meta.recommendations = await jikanRecommendations(jikanRaw.mal_id);
+          await sleep(450);
 
           if (prev && prev.status && prev.status !== meta.status) {
-            news.season_news.push({
-              date: today(),
-              summary: `تغيّرت حالة "${meta.title}" من ${arStatus(prev.status)} إلى ${arStatus(meta.status)}`,
-              source: 'TVmaze'
-            });
+            news.season_news.push({ date: today(), summary: `تغيّرت حالة "${meta.title}" من ${arStatus(prev.status)} إلى ${arStatus(meta.status)}`, source: 'MyAnimeList' });
           }
-          if (newNextDate && prev?.next_episode_date && newNextDate !== prev.next_episode_date) {
-            news.release_news.push({
-              date: today(),
-              summary: `تغيّر موعد الحلقة القادمة من ${prev.next_episode_date} إلى ${newNextDate}`,
-              source: 'TVmaze'
-            });
-          } else if (newNextDate && !prev?.next_episode_date) {
-            news.release_news.push({
-              date: today(),
-              summary: `تم تحديد موعد الحلقة القادمة: ${newNextDate}`,
-              source: 'TVmaze'
-            });
+        } else if (external_source === 'tvmaze' && external_id) {
+          const tv = await tvmazeById(external_id);
+          if (tv) {
+            await applyTvmazeMeta(meta, tv, news, prev, today, arStatus);
+            meta.external_source = 'tvmaze'; meta.external_id = tv.id;
           }
-          meta.next_episode_date = newNextDate;
+        } else {
+          const tv = await tvmazeLookup(title);
+          if (tv) {
+            await applyTvmazeMeta(meta, tv, news, prev, today, arStatus);
+            meta.external_source = 'tvmaze'; meta.external_id = tv.id;
+          } else {
+            const movieFallback = await itunesLookupMovie(title, year_hint);
+            if (movieFallback) {
+              meta.external_source = 'itunes'; meta.external_id = movieFallback.trackId;
+              meta.title = movieFallback.trackName || title;
+              meta.year = (movieFallback.releaseDate || '').slice(0, 4) || meta.year;
+              meta.poster_url = bigArtwork(movieFallback.artworkUrl100) || meta.poster_url;
+              const rawDesc = (await itunesLongDescription(movieFallback.trackId)) || '';
+              if (rawDesc && rawDesc !== meta.description_en) {
+                meta.description = await translateToArabic(rawDesc);
+                meta.description_en = rawDesc;
+              }
+            } else {
+              console.log('No Jikan/TVmaze/iTunes match for', title);
+            }
+          }
+        }
+
+      } else {
+        // series / cartoon
+        let tv = null;
+        if (external_source === 'tvmaze' && external_id) tv = await tvmazeById(external_id);
+        if (!tv) tv = await tvmazeLookup(title);
+        if (tv) {
+          meta.external_source = 'tvmaze'; meta.external_id = tv.id;
+          await applyTvmazeMeta(meta, tv, news, prev, today, arStatus);
         } else {
           console.log('No TVmaze match for', title);
         }
@@ -267,7 +352,7 @@ async function processItem(titleEntry, prev) {
       console.error('Metadata lookup error for', title, e.message);
     }
   }
-  // type === 'play' | 'story' | 'game' -> no automatic source, manual data only via local overrides
+  // type === 'play' | 'story' | 'game' -> manual data only via overrides
 
   // Google News RSS — best effort, free, classified by keyword, translated to Arabic
   try {
@@ -305,7 +390,6 @@ async function processItem(titleEntry, prev) {
     meta.status = 'cancelled';
   }
 
-  // merge with previous news, keep most recent 8 per category
   for (const cat of ['season_news', 'release_news', 'general_news']) {
     const prevList = (prev && prev.news && prev.news[cat]) || [];
     news[cat] = [...news[cat], ...prevList].slice(0, 8);
@@ -316,24 +400,74 @@ async function processItem(titleEntry, prev) {
   return meta;
 }
 
+async function applyTvmazeMeta(meta, tv, news, prev, todayFn, arStatusFn) {
+  meta.title = tv.name || meta.title;
+  meta.year = (tv.premiered || '').slice(0, 4) || meta.year;
+  meta.poster_url = (tv.image && (tv.image.original || tv.image.medium)) || meta.poster_url;
+  const rawDesc = stripHtml(tv.summary || '');
+  if (rawDesc && rawDesc !== meta.description_en) {
+    meta.description = await translateToArabic(rawDesc);
+    meta.description_en = rawDesc;
+  }
+  meta.status = mapTvmazeStatus(tv.status);
+
+  const counts = await tvmazeEpisodeCounts(tv.id);
+  meta.total_seasons = counts.seasons || meta.total_seasons;
+  meta.total_episodes = counts.episodes || meta.total_episodes;
+
+  const newNextDate = await tvmazeNextEpisode(tv.id);
+
+  if (prev && prev.status && prev.status !== meta.status) {
+    news.season_news.push({ date: todayFn(), summary: `تغيّرت حالة "${meta.title}" من ${arStatusFn(prev.status)} إلى ${arStatusFn(meta.status)}`, source: 'TVmaze' });
+  }
+  if (newNextDate && prev?.next_episode_date && newNextDate !== prev.next_episode_date) {
+    news.release_news.push({ date: todayFn(), summary: `تغيّر موعد الحلقة القادمة من ${prev.next_episode_date} إلى ${newNextDate}`, source: 'TVmaze' });
+  } else if (newNextDate && !prev?.next_episode_date) {
+    news.release_news.push({ date: todayFn(), summary: `تم تحديد موعد الحلقة القادمة: ${newNextDate}`, source: 'TVmaze' });
+  }
+  meta.next_episode_date = newNextDate;
+}
+
 /* ---------- main ---------- */
 async function main() {
   const titles = readJSON(TITLES_PATH, []);
   const prevCatalog = readJSON(CATALOG_PATH, { items: [] });
+  const userdata = readJSON(USERDATA_PATH, { progress: {}, overrides: {}, hidden: {} });
+  let userdataChanged = false;
+
+  // userdata may be encrypted ({encrypted:true,...}) — the season-bump auto-flip below only
+  // works when we can read plaintext progress. If encrypted, skip that specific automation
+  // (the client-side status-baseline check in index.html still handles the override-staleness case).
+  const canReadProgress = userdata && userdata.progress && !userdata.encrypted;
+
   const prevById = {};
   (prevCatalog.items || []).forEach(i => { prevById[i.id] = i; });
 
   const targets = ONLY_ID ? titles.filter(t => t.id === ONLY_ID) : titles;
-  if (targets.length === 0) {
-    console.log('Nothing to process.');
-  }
+  if (targets.length === 0) console.log('Nothing to process.');
 
   const results = [];
   for (const t of targets) {
     console.log('Processing:', t.title);
-    const item = await processItem(t, prevById[t.id]);
+    const prev = prevById[t.id];
+    const item = await processItem(t, prev);
     results.push(item);
-    await new Promise(r => setTimeout(r, 300)); // be gentle with external APIs
+
+    if (canReadProgress) {
+      const prevSeasons = prev?.total_seasons || 0;
+      const prevEpisodes = prev?.total_episodes || 0;
+      const newSeasons = item.total_seasons || 0;
+      const newEpisodes = item.total_episodes || 0;
+      const grew = newSeasons > prevSeasons || newEpisodes > prevEpisodes;
+      if (grew && userdata.progress[t.id] && userdata.progress[t.id].watchStatus === 'completed') {
+        userdata.progress[t.id].watchStatus = 'incomplete';
+        userdata.progress[t.id].updatedAt = new Date().toISOString();
+        userdataChanged = true;
+        console.log(`-> ${t.title}: new season/episode detected, flipped personal status to "incomplete"`);
+      }
+    }
+
+    await sleep(300);
   }
 
   let finalItems;
@@ -341,11 +475,11 @@ async function main() {
     finalItems = (prevCatalog.items || []).filter(i => i.id !== ONLY_ID);
     finalItems.push(...results);
   } else {
-    // full run: drop any catalog items whose title entry no longer exists (i.e. removed from titles.json)
     finalItems = results;
   }
 
   writeJSON(CATALOG_PATH, { updatedAt: new Date().toISOString(), items: finalItems });
+  if (userdataChanged) writeJSON(USERDATA_PATH, userdata);
   console.log(`Done. ${results.length} item(s) processed, ${finalItems.length} total in catalog.`);
 }
 

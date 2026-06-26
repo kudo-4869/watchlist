@@ -15,6 +15,7 @@ on:
           - series
           - movie
           - anime
+          - cartoon
           - play
           - story
           - game
@@ -52,6 +53,6 @@ jobs:
         run: |
           git config user.name "watchlist-bot"
           git config user.email "actions@users.noreply.github.com"
-          git add data/titles.json data/catalog.json
+          git add data/titles.json data/catalog.json data/userdata.json
           git commit -m "إضافة: ${{ inputs.title }}"
           git push
