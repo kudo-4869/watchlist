@@ -256,11 +256,12 @@ const CACHE_KEY = 'watchlist_userdata_cache_v1';
 const PASSPHRASE_SESSION_KEY = 'watchlist_passphrase_v1';
 
 let CATALOG = { updatedAt: null, items: [] };
-let LOCAL = { progress:{}, overrides:{}, hidden:{}, settings:{ repo:'', token:'' } };
+let LOCAL = { progress:{}, overrides:{}, hidden:{}, readNews:{}, settings:{ repo:'', token:'' } };
 let activeSection = 'all';
 let activeCollection = null;
 let activeDetailId = null;
 let activeDetailTab = 'overview';
+let activeNewsType = null;
 let catalogLoadFailed = false;
 let PASSPHRASE = null;
 let ENCRYPTION_ACTIVE = false;
@@ -306,7 +307,7 @@ async function tryUnlock(promptedPassphrase){
   if(!p) return false;
   try{
     const d = await decryptUserData(p, RAW_ENCRYPTED_PAYLOAD);
-    LOCAL.progress = d.progress||{}; LOCAL.overrides = d.overrides||{}; LOCAL.hidden = d.hidden||{};
+    LOCAL.progress = d.progress||{}; LOCAL.overrides = d.overrides||{}; LOCAL.hidden = d.hidden||{}; LOCAL.readNews = d.readNews||{};
     PASSPHRASE = p; ENCRYPTION_ACTIVE = true; NEEDS_UNLOCK = false;
     try{ sessionStorage.setItem(PASSPHRASE_SESSION_KEY, p); }catch(e){}
     cacheUserDataLocally();
@@ -333,7 +334,7 @@ async function loadUserData(){
         if(cached){
           try{
             const d = await decryptUserData(cached, raw);
-            LOCAL.progress=d.progress||{}; LOCAL.overrides=d.overrides||{}; LOCAL.hidden=d.hidden||{};
+            LOCAL.progress=d.progress||{}; LOCAL.overrides=d.overrides||{}; LOCAL.hidden=d.hidden||{}; LOCAL.readNews=d.readNews||{};
             PASSPHRASE = cached; ENCRYPTION_ACTIVE = true;
             cacheUserDataLocally();
             return;
@@ -343,18 +344,18 @@ async function loadUserData(){
         NEEDS_UNLOCK = true;
         return;
       }
-      LOCAL.progress = raw.progress||{}; LOCAL.overrides = raw.overrides||{}; LOCAL.hidden = raw.hidden||{};
+      LOCAL.progress = raw.progress||{}; LOCAL.overrides = raw.overrides||{}; LOCAL.hidden = raw.hidden||{}; LOCAL.readNews = raw.readNews||{};
       cacheUserDataLocally();
       return;
     }
   }catch(e){ console.error('userdata load failed', e); }
   try{
     const raw = localStorage.getItem(CACHE_KEY);
-    if(raw){ const d = JSON.parse(raw); LOCAL.progress=d.progress||{}; LOCAL.overrides=d.overrides||{}; LOCAL.hidden=d.hidden||{}; }
+    if(raw){ const d = JSON.parse(raw); LOCAL.progress=d.progress||{}; LOCAL.overrides=d.overrides||{}; LOCAL.hidden=d.hidden||{}; LOCAL.readNews=d.readNews||{}; }
   }catch(e){}
 }
 function cacheUserDataLocally(){
-  try{ localStorage.setItem(CACHE_KEY, JSON.stringify({progress:LOCAL.progress, overrides:LOCAL.overrides, hidden:LOCAL.hidden})); }catch(e){}
+  try{ localStorage.setItem(CACHE_KEY, JSON.stringify({progress:LOCAL.progress, overrides:LOCAL.overrides, hidden:LOCAL.hidden, readNews:LOCAL.readNews})); }catch(e){}
 }
 async function syncUserDataToRepo(){
   try{
@@ -362,7 +363,7 @@ async function syncUserDataToRepo(){
     const getRes = await githubApi(path);
     let sha;
     if(getRes.ok){ const d = await getRes.json(); sha = d.sha; }
-    const payloadObj = {progress:LOCAL.progress, overrides:LOCAL.overrides, hidden:LOCAL.hidden};
+    const payloadObj = {progress:LOCAL.progress, overrides:LOCAL.overrides, hidden:LOCAL.hidden, readNews:LOCAL.readNews};
     const finalPayload = PASSPHRASE ? await encryptUserData(PASSPHRASE, payloadObj) : payloadObj;
     const body = {message:'تحديث بياناتي', content: utf8ToBase64(JSON.stringify(finalPayload,null,2)+'\n'), branch:'main'};
     if(sha) body.sha = sha;
@@ -478,6 +479,13 @@ function getProgress(id){
   return LOCAL.progress[id] || {watchStatus:'planning', currentSeason:1, currentEpisode:0, watchedEpisodes:0, rating:null, notes:'', updatedAt:null};
 }
 function getOverride(id){ return LOCAL.overrides[id] || {}; }
+function isReadNews(newsId){ return !!LOCAL.readNews[newsId]; }
+async function markNewsRead(newsId){
+  LOCAL.readNews[newsId] = true;
+  renderAll();
+  if(activeDetailId) renderDetail();
+  await persistUserData();
+}
 function mergedItem(catalogItem){
   const ov = Object.assign({}, getOverride(catalogItem.id));
   if(ov.status !== undefined && ov._statusBaseline !== undefined && ov._statusBaseline !== catalogItem.status){
@@ -618,32 +626,54 @@ function progressFraction(item){
 }
 function renderNewsFeed(){
   const grid = document.getElementById('grid');
-  const items = visibleItems();
+  let items = visibleItems();
+  if(activeNewsType) items = items.filter(i=>i.type===activeNewsType);
   const buckets = {season_news:[], release_news:[], general_news:[]};
   items.forEach(it=>{
     Object.keys(NEWS_LABELS).forEach(cat=>{
-      (it.news[cat]||[]).forEach(n=> buckets[cat].push(Object.assign({}, n, {itemId: it.id, itemTitle: it.title, itemType: it.type})));
+      (it.news[cat]||[]).forEach(n=>{
+        if(isReadNews(n.id)) return;
+        buckets[cat].push(Object.assign({}, n, {itemId: it.id, itemTitle: it.title, itemType: it.type}));
+      });
     });
   });
   Object.keys(buckets).forEach(cat=> buckets[cat].sort((a,b)=> (b.date||'').localeCompare(a.date||'')));
   const total = buckets.season_news.length + buckets.release_news.length + buckets.general_news.length;
+
+  const allTypesPresent = new Set(visibleItems().map(i=>i.type));
+  const typeChips = `<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px;">` +
+    `<button class="coll-chip ${!activeNewsType?'sel':''}" data-nt="">الكل</button>` +
+    Object.keys(TYPE_LABELS).filter(t=>allTypesPresent.has(t)).map(t=>`<button class="coll-chip ${activeNewsType===t?'sel':''}" data-nt="${t}">${TYPE_LABELS[t]}</button>`).join('') +
+    `</div>`;
+
   if(total===0){
-    grid.innerHTML = `<div class="empty"><div class="big">📰</div><p>ما فيه أخبار جديدة لحد الآن.</p><p>تُفحص أعمالك تلقائيًا كل يوم.</p></div>`;
+    grid.innerHTML = `<div style="grid-column:1/-1;max-width:760px;">${typeChips}<div class="empty"><div class="big">📰</div><p>ما فيه أخبار جديدة (غير المقروءة) لحد الآن.</p><p>تُفحص أعمالك تلقائيًا كل يوم.</p></div></div>`;
+    wireNewsTypeChips();
     return;
   }
-  grid.innerHTML = `<div style="grid-column:1/-1;max-width:760px;">` +
+  grid.innerHTML = `<div style="grid-column:1/-1;max-width:760px;">` + typeChips +
     Object.keys(NEWS_LABELS).map(cat=>`
       <div class="news-group">
         <h4><span class="bar" style="background:${NEWS_COLORS[cat]}"></span>${NEWS_LABELS[cat]} <span style="color:var(--muted2);font-weight:400;">(${buckets[cat].length})</span></h4>
         ${buckets[cat].length===0 ? `<div class="news-empty">لا يوجد جديد حتى الآن.</div>` :
           buckets[cat].map(n=>`
-            <div class="news-item" data-open="${n.itemId}" style="cursor:pointer;">
-              <div class="d">${escapeHtml(n.date||'')} · <span style="color:${TYPE_COLORS[n.itemType]||'var(--muted)'}">${escapeHtml(n.itemTitle)}</span></div>
-              <div class="s">${escapeHtml(n.summary||'')}</div>
-              ${n.source?`<div class="src">المصدر: ${escapeHtml(n.source)}</div>`:''}
+            <div class="news-item">
+              <div style="display:flex;justify-content:space-between;gap:10px;align-items:flex-start;">
+                <div style="flex:1;cursor:pointer;" data-open="${n.itemId}">
+                  <div class="d">${escapeHtml(n.date||'')} · <span style="color:${TYPE_COLORS[n.itemType]||'var(--muted)'}">${escapeHtml(n.itemTitle)}</span></div>
+                  <div class="s">${escapeHtml(n.summary||'')}</div>
+                  ${n.source?`<div class="src">المصدر: ${escapeHtml(n.source)}</div>`:''}
+                </div>
+                <button class="btn btn-secondary" data-mark-read="${n.id}" title="قرأته، لا تعرضه ثانية" style="flex:none;padding:6px 9px;font-size:12px;">✓</button>
+              </div>
             </div>`).join('')}
       </div>`).join('') + `</div>`;
   grid.querySelectorAll('[data-open]').forEach(el=>el.addEventListener('click', ()=> openDetail(el.dataset.open)));
+  grid.querySelectorAll('[data-mark-read]').forEach(el=>el.addEventListener('click', (e)=>{ e.stopPropagation(); markNewsRead(el.dataset.markRead); }));
+  wireNewsTypeChips();
+}
+function wireNewsTypeChips(){
+  document.querySelectorAll('[data-nt]').forEach(b=>b.addEventListener('click', ()=>{ activeNewsType = b.dataset.nt || null; renderNewsFeed(); }));
 }
 function renderGrid(){
   const grid = document.getElementById('grid');
@@ -944,12 +974,14 @@ function renderDetail(){
         <span>آخر فحص تلقائي: ${timeAgo(raw.checkedAt)}</span>
         <button class="btn btn-secondary" id="refreshOneBtn" style="padding:7px 12px;font-size:12.5px;">🔄 تشغيل التحديث</button>
       </div>
-      ${Object.keys(NEWS_LABELS).map(cat=>`
+      ${Object.keys(NEWS_LABELS).map(cat=>{
+        const unread = item.news[cat].filter(n=>!isReadNews(n.id));
+        return `
         <div class="news-group">
           <h4><span class="bar" style="background:${NEWS_COLORS[cat]}"></span>${NEWS_LABELS[cat]}</h4>
-          ${item.news[cat].length===0 ? `<div class="news-empty">لا يوجد جديد حتى الآن.</div>` :
-            item.news[cat].map(n=>`<div class="news-item"><div class="d">${escapeHtml(n.date||'')}</div><div class="s">${escapeHtml(n.summary||'')}</div>${n.source?`<div class="src">المصدر: ${escapeHtml(n.source)}</div>`:''}</div>`).join('')}
-        </div>`).join('')}
+          ${unread.length===0 ? `<div class="news-empty">لا يوجد جديد حتى الآن.</div>` :
+            unread.map(n=>`<div class="news-item"><div style="display:flex;justify-content:space-between;gap:10px;align-items:flex-start;"><div style="flex:1;"><div class="d">${escapeHtml(n.date||'')}</div><div class="s">${escapeHtml(n.summary||'')}</div>${n.source?`<div class="src">المصدر: ${escapeHtml(n.source)}</div>`:''}</div><button class="btn btn-secondary" data-mark-read="${n.id}" title="قرأته" style="flex:none;padding:6px 9px;font-size:12px;">✓</button></div></div>`).join('')}
+        </div>`;}).join('')}
     </div>
     <div class="tab-panel ${activeDetailTab==='suggestions'?'':'hidden'}" data-panel="suggestions">
       ${renderSuggestionsContent(raw)}
@@ -1073,11 +1105,13 @@ function wireDetailEvents(item, raw){
   document.querySelectorAll('[data-add-suggestion]').forEach(b=>b.addEventListener('click', ()=>{
     addSuggestedAnime(parseInt(b.dataset.addSuggestion), b.dataset.addName);
   }));
+
+  document.querySelectorAll('#detailModal [data-mark-read]').forEach(b=>b.addEventListener('click', ()=> markNewsRead(b.dataset.markRead)));
 }
 
 /* ===================== EXPORT / IMPORT ===================== */
 document.getElementById('exportBtn').addEventListener('click', ()=>{
-  const exportable = { progress: LOCAL.progress, overrides: LOCAL.overrides, hidden: LOCAL.hidden };
+  const exportable = { progress: LOCAL.progress, overrides: LOCAL.overrides, hidden: LOCAL.hidden, readNews: LOCAL.readNews };
   const blob = new Blob([JSON.stringify(exportable, null, 2)], {type:'application/json'});
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
@@ -1097,6 +1131,7 @@ document.getElementById('importFile').addEventListener('change', (e)=>{
       LOCAL.progress = Object.assign({}, LOCAL.progress, parsed.progress||{});
       LOCAL.overrides = Object.assign({}, LOCAL.overrides, parsed.overrides||{});
       LOCAL.hidden = Object.assign({}, LOCAL.hidden, parsed.hidden||{});
+      LOCAL.readNews = Object.assign({}, LOCAL.readNews, parsed.readNews||{});
       renderAll();
       await persistUserData();
       showToast('تم استيراد بياناتك (أُضيفت لما هو موجود)', 'success');
@@ -1116,7 +1151,7 @@ function showConfirm(message, onYes){
 }
 document.getElementById('resetBtn').addEventListener('click', ()=>{
   showConfirm('سيُحذف تقدّمك وتقييماتك وملاحظاتك من المستودع ومن متصفحك، وتُحذف إعدادات الربط المحفوظة. متأكد؟', async ()=>{
-    LOCAL.progress = {}; LOCAL.overrides = {}; LOCAL.hidden = {};
+    LOCAL.progress = {}; LOCAL.overrides = {}; LOCAL.hidden = {}; LOCAL.readNews = {};
     PASSPHRASE = null;
     await persistUserData();
     LOCAL.settings = {repo:'', token:''};

@@ -94,6 +94,22 @@ async function translateToArabic(text) {
 }
 
 /* ---------- Google News RSS (free, no key) ---------- */
+const TYPE_QUALIFIER_AR = { series:'مسلسل', anime:'أنمي', cartoon:'كرتون', movie:'فيلم' };
+const TYPE_QUALIFIER_EN = { series:'series', anime:'anime', cartoon:'cartoon', movie:'movie' };
+function isRelevant(articleTitle, refTitle) {
+  const a = (articleTitle || '').toLowerCase();
+  const r = (refTitle || '').toLowerCase().trim();
+  if (!r) return true;
+  const rAr = hasArabic(r), aAr = hasArabic(a);
+  if (rAr !== aAr) return true; // can't cheaply validate across scripts — let it through
+  return a.includes(r);
+}
+function newsId(itemId, cat, seed) {
+  let h = 0;
+  const s = `${itemId}|${cat}|${seed}`;
+  for (let i = 0; i < s.length; i++) { h = (h * 31 + s.charCodeAt(i)) | 0; }
+  return `n${Math.abs(h)}`;
+}
 async function fetchGoogleNewsRSS(query, hl, gl, ceid) {
   const url = `https://news.google.com/rss/search?q=${encodeURIComponent(query)}&hl=${hl}&gl=${gl}&ceid=${ceid}`;
   try {
@@ -305,7 +321,7 @@ async function processItem(titleEntry, prev) {
           await sleep(450);
 
           if (prev && prev.status && prev.status !== meta.status) {
-            news.season_news.push({ date: today(), summary: `تغيّرت حالة "${meta.title}" من ${arStatus(prev.status)} إلى ${arStatus(meta.status)}`, source: 'MyAnimeList' });
+            news.season_news.push({ id: newsId(id, 'season_news', `status-${meta.status}`), date: today(), summary: `تغيّرت حالة "${meta.title}" من ${arStatus(prev.status)} إلى ${arStatus(meta.status)}`, source: 'MyAnimeList' });
           }
         } else if (external_source === 'tvmaze' && external_id) {
           const tv = await tvmazeById(external_id);
@@ -356,9 +372,14 @@ async function processItem(titleEntry, prev) {
 
   // Google News RSS — best effort, free, classified by keyword, translated to Arabic
   try {
+    const searchTitle = meta.title || title;
+    const qualAr = TYPE_QUALIFIER_AR[type] || '';
+    const qualEn = TYPE_QUALIFIER_EN[type] || '';
+    const arQuery = `"${searchTitle}" ${qualAr}`.trim();
+    const enQuery = `"${searchTitle}" ${qualEn}`.trim();
     const [arRaw, enRaw] = await Promise.all([
-      fetchGoogleNewsRSS(title, 'ar', 'SA', 'SA:ar'),
-      fetchGoogleNewsRSS(title, 'en-US', 'US', 'US:en')
+      fetchGoogleNewsRSS(arQuery, 'ar', 'SA', 'SA:ar'),
+      fetchGoogleNewsRSS(enQuery, 'en-US', 'US', 'US:en')
     ]);
     const merged = [
       ...arRaw.map(it => ({ ...it, lang: 'ar' })),
@@ -371,11 +392,12 @@ async function processItem(titleEntry, prev) {
       if (seenLinks.has(it.link)) continue;
       const t = new Date(it.pubDate).getTime();
       if (isNaN(t) || t < cutoff) continue;
+      if (!isRelevant(it.title, searchTitle)) continue;
       seenLinks.add(it.link);
       const cat = classify(it.title);
       if (cat === 'season_news' && isCancelNews(it.title)) forceCancelled = true;
       const summary = it.lang === 'en' ? await translateToArabic(it.title) : it.title;
-      news[cat].push({ date: it.pubDate ? it.pubDate.slice(0, 16) : '', summary, source: it.source || 'Google News' });
+      news[cat].push({ id: newsId(id, cat, it.link), date: it.pubDate ? it.pubDate.slice(0, 16) : '', summary, source: it.source || 'Google News' });
     }
     meta.seenLinks = Array.from(seenLinks).slice(-250);
   } catch (e) {
@@ -385,7 +407,7 @@ async function processItem(titleEntry, prev) {
 
   if (forceCancelled && meta.status !== 'cancelled' && AUTO_FETCH_TYPES.has(type)) {
     if (prev && prev.status && prev.status !== 'cancelled') {
-      news.season_news.unshift({ date: today(), summary: `رصدنا خبرًا يشير لإلغاء "${meta.title}"`, source: 'Google News' });
+      news.season_news.unshift({ id: newsId(id, 'season_news', `cancel-${today()}`), date: today(), summary: `رصدنا خبرًا يشير لإلغاء "${meta.title}"`, source: 'Google News' });
     }
     meta.status = 'cancelled';
   }
@@ -418,12 +440,12 @@ async function applyTvmazeMeta(meta, tv, news, prev, todayFn, arStatusFn) {
   const newNextDate = await tvmazeNextEpisode(tv.id);
 
   if (prev && prev.status && prev.status !== meta.status) {
-    news.season_news.push({ date: todayFn(), summary: `تغيّرت حالة "${meta.title}" من ${arStatusFn(prev.status)} إلى ${arStatusFn(meta.status)}`, source: 'TVmaze' });
+    news.season_news.push({ id: newsId(meta.id, 'season_news', `status-${meta.status}`), date: todayFn(), summary: `تغيّرت حالة "${meta.title}" من ${arStatusFn(prev.status)} إلى ${arStatusFn(meta.status)}`, source: 'TVmaze' });
   }
   if (newNextDate && prev?.next_episode_date && newNextDate !== prev.next_episode_date) {
-    news.release_news.push({ date: todayFn(), summary: `تغيّر موعد الحلقة القادمة من ${prev.next_episode_date} إلى ${newNextDate}`, source: 'TVmaze' });
+    news.release_news.push({ id: newsId(meta.id, 'release_news', `next-${newNextDate}`), date: todayFn(), summary: `تغيّر موعد الحلقة القادمة من ${prev.next_episode_date} إلى ${newNextDate}`, source: 'TVmaze' });
   } else if (newNextDate && !prev?.next_episode_date) {
-    news.release_news.push({ date: todayFn(), summary: `تم تحديد موعد الحلقة القادمة: ${newNextDate}`, source: 'TVmaze' });
+    news.release_news.push({ id: newsId(meta.id, 'release_news', `next-${newNextDate}`), date: todayFn(), summary: `تم تحديد موعد الحلقة القادمة: ${newNextDate}`, source: 'TVmaze' });
   }
   meta.next_episode_date = newNextDate;
 }
